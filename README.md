@@ -1,23 +1,17 @@
 # gather-for-the-python-extension README
 
-E
-
 ## Features
 
-Makes gather work
+Adds gather functionality to the Python Extension.
 
 ## Requirements
 
-The Python Extension
+The Python Extension for Visual Studio Code.
 
 ## Known Issues
 
-None
-
 ## Release Notes
 
-E
-
-### 1.0.0
+### 2020.8.0
 
 Initial release of gather
