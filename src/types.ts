@@ -1,11 +1,7 @@
 import type { nbformat } from "@jupyterlab/coreutils";
 
 export namespace Constants {
-  export const reload = "reload";
   export const DefaultCodeCellMarker = "# %%";
-  export const DefaultCellMarker = "# %%";
-  export const reloadRequired =
-    "Please reload the window for new settings to take effect.";
 }
 
 export interface IGatherProvider {
