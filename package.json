@@ -1,9 +1,17 @@
 {
-  "name": "gather-for-the-python-extension",
-  "displayName": "Gather for the Python Extension",
+  "name": "gather",
+  "displayName": "Gather",
   "description": "Adds gather functionality to the Python Extension",
   "version": "0.0.1",
   "publisher": "ms-python",
+  "homepage": "https://github.com/Microsoft/vscode-python",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/vscode-gather"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-python/issues"
+  },
   "engines": {
     "vscode": "^1.46.0"
   },
