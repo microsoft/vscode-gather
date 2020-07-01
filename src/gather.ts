@@ -1,4 +1,4 @@
-import * as ppatypes from "@msrvida/python-program-analysis";
+import * as ppa from "@msrvida/python-program-analysis";
 import * as path from "path";
 import * as uuid from "uuid/v4";
 import { workspace } from "vscode";
@@ -8,17 +8,15 @@ import {
   CellState,
   ICell as IVscCell,
 } from "./types";
-import { log } from "console";
 import { pathExists } from "./helpers";
+import * as util from "util";
 
 export class GatherProvider implements IGatherProvider {
-  private _executionSlicer:
-    | ppatypes.ExecutionLogSlicer<ppatypes.Cell>
-    | undefined;
-  private dataflowAnalyzer: ppatypes.DataflowAnalyzer | undefined;
+  private _executionSlicer: ppa.ExecutionLogSlicer<ppa.Cell> | undefined;
+  private dataflowAnalyzer: ppa.DataflowAnalyzer | undefined;
   private initPromise: Promise<void>;
 
-  constructor() {
+  constructor(private readonly extensionPath: string) {
     this.initPromise = this.init();
   }
 
@@ -72,13 +70,17 @@ export class GatherProvider implements IGatherProvider {
 
   private async init(): Promise<void> {
     try {
-      const ppa = require("@msrvida/python-program-analysis");
-
       if (ppa) {
         // If the __builtins__ specs are not available for gather, then no specs have been found. Look in a specific location relative
         // to the extension.
         if (!ppa.getSpecs()) {
-          const defaultSpecFolder = path.join(__dirname, "gatherSpecs");
+          console.error("not found");
+          const defaultSpecFolder = path.join(
+            this.extensionPath,
+            "out",
+            "client",
+            "gatherSpecs"
+          );
           if (await pathExists(defaultSpecFolder)) {
             ppa.setSpecFolder(defaultSpecFolder);
           }
@@ -92,7 +94,7 @@ export class GatherProvider implements IGatherProvider {
         if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
           ppa.addSpecFolder(additionalSpecPath);
         } else {
-          log(
+          console.error(
             `Gather: additional spec folder ${additionalSpecPath} but not found.`
           );
         }
@@ -104,11 +106,11 @@ export class GatherProvider implements IGatherProvider {
             this.dataflowAnalyzer
           );
         } else {
-          log("Gather couldn't find any package specs.");
+          console.error("Gather couldn't find any package specs.");
         }
       }
     } catch (ex) {
-      log(`Gathering tools could't be activated. ${ex.message}`);
+      console.error(`Gathering tools could't be activated. ${util.format(ex)}`);
     }
   }
 }
@@ -116,7 +118,7 @@ export class GatherProvider implements IGatherProvider {
 /**
  * Accumulator to concatenate cell slices for a sliced program, preserving cell structures.
  */
-function concat(existingText: string, newText: ppatypes.CellSlice): string {
+function concat(existingText: string, newText: ppa.CellSlice): string {
   // Include our cell marker so that cell slices are preserved
   return `${existingText}#%%\n${newText.textSliceLines}\n`;
 }
@@ -125,10 +127,10 @@ function concat(existingText: string, newText: ppatypes.CellSlice): string {
  * This is called to convert VS Code ICells to Gather ICells for logging.
  * @param cell A cell object conforming to the VS Code cell interface
  */
-function convertVscToGatherCell(cell: IVscCell): ppatypes.Cell | undefined {
+function convertVscToGatherCell(cell: IVscCell): ppa.Cell | undefined {
   // This should always be true since we only want to log code cells. Putting this here so types match for outputs property
   if (cell.data.cell_type === "code") {
-    const result: ppatypes.Cell = {
+    const result: ppa.Cell = {
       // tslint:disable-next-line no-unnecessary-local-variable
       text: cell.data.source,
 
