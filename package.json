@@ -4,6 +4,9 @@
   "description": "Adds gather functionality to the Python Extension",
   "version": "2020.7.0-dev",
   "publisher": "ms-python",
+  "author": {
+    "name": "Microsoft Corporation"
+  },
   "homepage": "https://github.com/Microsoft/vscode-python",
   "repository": {
     "type": "git",
@@ -65,5 +68,8 @@
     "path": "^0.12.7",
     "uuid": "^3.3.2",
     "webpack-bundle-analyzer": "^3.8.0"
+  },
+  "__metadata": {
+    "publisherDisplayName": "Microsoft"
   }
 }
