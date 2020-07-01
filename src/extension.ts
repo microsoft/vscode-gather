@@ -1,10 +1,11 @@
 import { IGatherProvider } from "./types";
 import { GatherProvider } from "./gather";
+import { ExtensionContext } from "vscode";
 
-export function activate() {
+export function activate(context: ExtensionContext) {
   let api = {
     getGatherProvider(): IGatherProvider {
-      return new GatherProvider();
+      return new GatherProvider(context.extensionPath);
     },
   };
 
