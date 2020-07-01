@@ -20,6 +20,14 @@ export class GatherProvider implements IGatherProvider {
     this.initPromise = this.init();
   }
 
+  public async getLogLenght(): Promise<number | undefined> {
+    await this.initPromise;
+
+    if (this._executionSlicer) {
+      return this._executionSlicer.executionLog.length;
+    }
+  }
+
   public async logExecution(vscCell: IVscCell): Promise<void> {
     await this.initPromise;
 
