@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality to the Python Extension",
-  "version": "2020.7.0-dev",
+  "version": "2020.7.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
