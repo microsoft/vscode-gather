@@ -21,15 +21,15 @@ Please note that the Python analysis is quite conservative, so if it is unsure w
     <img src=./images/step3.PNG>
     
 ## Additional Information
-Gather uses a set of files called "specs" that are used to identify whether each function provided in a python package modifies kernel state. Currently, the packages that are fully supported are:
+Gather uses a set of files called "specs" that are used to identify whether each function provided in a Python package modifies kernel state. Currently, the packages that are fully supported are:
 - matplotlib
 - numpy
 - pandas
 - random
 - sklearn
-- a set of built-in python functions/keywords 
+- a set of built-in Python functions/keywords 
 
-It is possible to add packages or api's to the supported list on your local installation. If you are interested in doing this for your own private work, or would like to  contribute to the community to support other popular python packages, please [let us know](https://github.com/Microsoft/vscode-python)! 
+It is possible to add packages or api's to the supported list on your local installation. If you are interested in doing this for your own private work, or would like to  contribute to the community to support other popular Python packages, please [let us know](https://github.com/Microsoft/vscode-python)! 
 
 ## Questions and issues
 
