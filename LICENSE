@@ -26,10 +26,10 @@ TERMS, YOU HAVE THE RIGHTS BELOW. BY USING THE SOFTWARE, YOU ACCEPT THESE TERMS.
     b)	Third Party Components. The software may include third party components 
         with separate legal notices or governed by other agreements, as may be 
         described in the ThirdPartyNotices file(s) accompanying the software. 
-    c)	Included Microsoft Applications. The software may include other 
-        Microsoft applications. These license terms apply to those included 
-        applications, if any, unless other license terms are provided with the 
-        other Microsoft applications.
+    c)	Included Microsoft Libraries. The software may include other Microsoft 
+        libraries. These license terms apply to those included libraries, if 
+        any, unless other license terms are provided with the other Microsoft 
+        libraries.
 
 2.	PRE-RELEASE SOFTWARE.  This software is a pre-release version.  It may not 
 operate correctly or work the way a final version will.  Microsoft may change it 
