@@ -10,7 +10,7 @@ Please note that the Python analysis is quite conservative, so if it is unsure w
 
     <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/master/images/step1.PNG>
 
-- **Step 2.** Use the Interactive Window or Notebook Editor to do your work.
+- **Step 2.** Run cells on the Interactive Window or Notebook Editor to do your work.
 
     <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/master/images/step2.PNG>
 
