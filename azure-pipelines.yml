@@ -13,14 +13,19 @@ pool:
 
 steps:
 - script: |
+    mv .npmrc .bla
     npm install vsts-npm-auth
-    vsts-npm-auth -config .npmrc
+    mv .bla .npmrc
   displayName: 'npm auth'
 
 - task: npmAuthenticate@0
   displayName: 'npm Authenticate .npmrc'
   inputs:
     workingFile: .npmrc
+
+- script: |
+    vsts-npm-auth -config .npmrc
+  displayName: 'npm auth'
 
 # - script: |
 #     npm install vsts-npm-auth --registry https://registry.npmjs.com
