@@ -21,6 +21,10 @@ steps:
   inputs:
     workingFile: .npmrc
 
+- script: |
+    vsts-npm-auth -config .npmrc
+  displayName: 'run vsts'
+
 - task: Npm@1
   displayName: 'npm install'
   inputs:
