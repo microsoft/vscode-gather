@@ -11,10 +11,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-16.04'
 
-# pool:
-#   name: Azure Pipelines
-#   demands: npm
-
 steps:
 - task: npmAuthenticate@0
   displayName: 'npm Authenticate .npmrc'
@@ -22,8 +18,7 @@ steps:
     workingFile: .npmrc
 
 - script: |
-    sudo chown -R $USER /usr/local/lib/node_modules
-    npm install -g vsts-npm-auth --registry https://registry.npmjs.com
+    npm install vsts-npm-auth --registry https://registry.npmjs.com
     npm run npm-auth
   displayName: 'npm auth'
 
@@ -31,22 +26,3 @@ steps:
   displayName: 'npm install'
   inputs:
     verbose: false
-
-# steps:
-# - task: npmAuthenticate@0
-#   displayName: 'npm Authenticate .npmrc'
-#   inputs:
-#     workingFile: .npmrc
-
-# - task: Npm@1
-#   displayName: 'npm install'
-#   inputs:
-#     verbose: false
-
-# - script: |
-#     npm run build:parser
-#   displayName: 'build'
-
-# - script: |
-#     npm run pipelineTest
-#   displayName: 'run tests'
