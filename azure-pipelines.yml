@@ -22,6 +22,7 @@ steps:
     workingFile: .npmrc
 
 - script: |
+    npm i vsts-npm-auth
     npm run npm-auth
   displayName: 'npm auth'
 
