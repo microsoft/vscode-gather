@@ -12,6 +12,11 @@ pool:
   vmImage: 'ubuntu-16.04'
 
 steps:
+- script: |
+    npm install vsts-npm-auth
+    vsts-npm-auth -config .npmrc
+  displayName: 'npm auth'
+
 - task: npmAuthenticate@0
   displayName: 'npm Authenticate .npmrc'
   inputs:
@@ -21,11 +26,6 @@ steps:
 #     npm install vsts-npm-auth --registry https://registry.npmjs.com
 #     npm run npm-auth
 #   displayName: 'npm auth'
-
-- script: |
-    npm install vsts-npm-auth
-    vsts-npm-auth -config .npmrc
-  displayName: 'npm auth'
 
 - task: Npm@1
   displayName: 'npm install'
