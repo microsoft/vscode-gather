@@ -30,7 +30,7 @@ steps:
     workingFile: .npmrc
 
 - script: |
-    ./node_modules/.bin/vsts-npm-auth -config .npmrc
+    /usr/local/lib/node_modules/.bin/vsts-npm-auth -config .npmrc
   displayName: 'npm auth'
 
 # - script: |
