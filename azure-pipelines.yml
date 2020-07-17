@@ -11,6 +11,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-16.04'
 
+# pool:
+#   name: Azure Pipelines
+#   demands: npm
+
 steps:
 - task: npmAuthenticate@0
   displayName: 'npm Authenticate .npmrc'
@@ -21,6 +25,17 @@ steps:
   displayName: 'npm install'
   inputs:
     verbose: false
+
+# steps:
+# - task: npmAuthenticate@0
+#   displayName: 'npm Authenticate .npmrc'
+#   inputs:
+#     workingFile: .npmrc
+
+# - task: Npm@1
+#   displayName: 'npm install'
+#   inputs:
+#     verbose: false
 
 # - script: |
 #     npm run build:parser
