@@ -14,9 +14,15 @@ pool:
 steps:
 - script: |
     mv .npmrc .bla
-    npm install -g vsts-npm-auth --registry https://registry.npmjs.com
+    npm install --verbose vsts-npm-auth --registry https://registry.npmjs.com
     mv .bla .npmrc
   displayName: 'npm auth'
+
+# - task: Npm@1
+#   inputs:
+#     command: 'install'
+#     customRegistry: 'useFeed'
+#     customFeed: '20953fb4-d427-4ad6-b78c-13142d0c5462/6132b653-278b-4342-b05e-3d7a9b8e3203'
 
 - task: npmAuthenticate@0
   displayName: 'npm Authenticate .npmrc'
