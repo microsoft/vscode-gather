@@ -22,8 +22,8 @@ steps:
     workingFile: .npmrc
 
 - script: |
-      npm run npm-auth
-    displayName: "npm auth"
+    npm run npm-auth
+  displayName: 'npm auth'
 
 - task: Npm@1
   displayName: 'npm install'
