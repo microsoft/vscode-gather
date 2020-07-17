@@ -22,8 +22,8 @@ steps:
     workingFile: .npmrc
 
 - script: |
-    vsts-npm-auth -config .npmrc
-  displayName: 'run vsts'
+      npm run npm-auth
+    displayName: "npm auth"
 
 - task: Npm@1
   displayName: 'npm install'
