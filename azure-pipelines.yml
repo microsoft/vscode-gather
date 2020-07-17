@@ -30,7 +30,7 @@ steps:
     workingFile: .npmrc
 
 - script: |
-    vsts-npm-auth -config .npmrc
+    ./node_modules/.bin/vsts-npm-auth -config .npmrc
   displayName: 'npm auth'
 
 # - script: |
