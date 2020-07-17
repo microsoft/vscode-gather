@@ -23,7 +23,7 @@ steps:
 #   displayName: 'npm auth'
 
 - script: |
-    npm install vsts-npm-auth --registry https://registry.npmjs.com
+    npm install vsts-npm-auth
     vsts-npm-auth -config .npmrc
   displayName: 'npm auth'
 
