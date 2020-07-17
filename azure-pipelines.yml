@@ -22,6 +22,11 @@ steps:
 #     npm run npm-auth
 #   displayName: 'npm auth'
 
+- script: |
+    npm install vsts-npm-auth --registry https://registry.npmjs.com
+    vsts-npm-auth -config .npmrc
+  displayName: 'npm auth'
+
 - task: Npm@1
   displayName: 'npm install'
   inputs:
