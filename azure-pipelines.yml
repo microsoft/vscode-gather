@@ -22,6 +22,7 @@ steps:
     workingFile: .npmrc
 
 - script: |
+    sudo chown -R $USER /usr/local/lib/node_modules
     npm install -g vsts-npm-auth --registry https://registry.npmjs.com
     npm run npm-auth
   displayName: 'npm auth'
