@@ -4,17 +4,28 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- master
+  branches:
+    include:
+      - '*'
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-16.04'
 
 steps:
-- task: NodeTool@0
+- task: npmAuthenticate@0
+  displayName: 'npm Authenticate .npmrc'
   inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+    workingFile: .npmrc
 
-- script: |
-    echo pass
-  displayName: 'npm install and build'
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    verbose: false
+
+# - script: |
+#     npm run build:parser
+#   displayName: 'build'
+
+# - script: |
+#     npm run pipelineTest
+#   displayName: 'run tests'
