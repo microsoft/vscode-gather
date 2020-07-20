@@ -3,19 +3,18 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-trigger:
+trigger: none
+schedules:
+- cron: '0 0 * * sat'
+  displayName: Weekly Performance Test
   branches:
     include:
-      - '*'
+      - master
 
 pool: 'GatherPool'
 
 steps:
-# - script: |
-#     mv .npmrc .bla
-#     npm install --verbose vsts-npm-auth --registry https://registry.npmjs.com
-#     mv .bla .npmrc
-#   displayName: 'npm auth'
+
 
 # - task: Npm@1
 #   inputs:
@@ -28,16 +27,11 @@ steps:
   inputs:
     workingFile: .npmrc
 
-# - script: |
-#     /usr/local/lib/node_modules/.bin/vsts-npm-auth -config .npmrc
-#   displayName: 'npm auth'
-
-# - script: |
-#     npm install vsts-npm-auth --registry https://registry.npmjs.com
-#     npm run npm-auth
-#   displayName: 'npm auth'
-
 - task: Npm@1
   displayName: 'npm install'
   inputs:
     verbose: false
+
+- script: |
+    npm run test
+  displayName: 'run unit tests'
