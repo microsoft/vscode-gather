@@ -8,15 +8,14 @@ trigger:
     include:
       - '*'
 
-pool:
-  vmImage: 'ubuntu-16.04'
+pool: 'GatherPool'
 
 steps:
-- script: |
-    mv .npmrc .bla
-    npm install --verbose vsts-npm-auth --registry https://registry.npmjs.com
-    mv .bla .npmrc
-  displayName: 'npm auth'
+# - script: |
+#     mv .npmrc .bla
+#     npm install --verbose vsts-npm-auth --registry https://registry.npmjs.com
+#     mv .bla .npmrc
+#   displayName: 'npm auth'
 
 # - task: Npm@1
 #   inputs:
@@ -29,9 +28,9 @@ steps:
   inputs:
     workingFile: .npmrc
 
-- script: |
-    /usr/local/lib/node_modules/.bin/vsts-npm-auth -config .npmrc
-  displayName: 'npm auth'
+# - script: |
+#     /usr/local/lib/node_modules/.bin/vsts-npm-auth -config .npmrc
+#   displayName: 'npm auth'
 
 # - script: |
 #     npm install vsts-npm-auth --registry https://registry.npmjs.com
