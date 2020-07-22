@@ -1,0 +1,7 @@
+{
+  "spec": "src/test/suite/*.unit.test.ts",
+  "require": ["ts-node/register", "src/test/unittests.ts"],
+  "ui": "tdd",
+  "recursive": true,
+  "colors": true
+}

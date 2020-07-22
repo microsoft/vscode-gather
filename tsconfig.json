@@ -5,9 +5,9 @@
       "*": ["types/*"]
     },
     "module": "commonjs",
-    "target": "es6",
+    "target": "es2018",
     "outDir": "out",
-    "lib": ["es6"],
+    "lib": ["es6", "es2018", "dom", "ES2019"],
     "sourceMap": true,
     "rootDir": "src",
     "strict": true /* enable all strict type-checking options */,
@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": ["node_modules", ".vscode-test", "src/test/suite"]
 }

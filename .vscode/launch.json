@@ -15,16 +15,30 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Extension Tests",
-      "type": "extensionHost",
+      "name": "Unit Tests",
+      "type": "node",
       "request": "launch",
-      "runtimeExecutable": "${execPath}",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "stopOnEntry": false,
+      "sourceMaps": true,
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+        "--config",
+        "./src/test/.mocha.config.json"
+        // "./src/test/suite/*.unit.test.ts",
+        // "--require=src/test/unittests.ts",
+        // "--ui=tdd",
+        // "--recursive",
+        // "--colors",
+        // // "--grep", "<suite name>",
+        // "--timeout=300000",
+        // "--fast"
       ],
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js",
+        "!${workspaceFolder}/**/node_modules**/*"
+      ],
+      "preLaunchTask": "${defaultBuildTask}",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

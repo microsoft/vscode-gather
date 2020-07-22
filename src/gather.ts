@@ -62,10 +62,15 @@ export class GatherProvider implements IGatherProvider {
     }
 
     const settings = workspace.getConfiguration();
+    let defaultCellMarker: string;
     // Get the default cell marker as we need to replace #%% with it.
-    const defaultCellMarker =
-      (settings.get("python.dataScience.defaultCellMarker") as string) ||
-      Constants.DefaultCodeCellMarker;
+    if (settings) {
+      defaultCellMarker = settings.get(
+        "python.dataScience.defaultCellMarker"
+      ) as string;
+    } else {
+      defaultCellMarker = Constants.DefaultCodeCellMarker;
+    }
 
     // Call internal slice method
     const slice = this._executionSlicer.sliceLatestExecution(
@@ -95,10 +100,14 @@ export class GatherProvider implements IGatherProvider {
         }
 
         const settings = workspace.getConfiguration();
-        // Check to see if any additional specs can be found.
-        const additionalSpecPath: string | undefined = settings.get(
-          "python.dataScience.gatherSpecPath"
-        );
+        let additionalSpecPath: string | undefined;
+        if (settings) {
+          // Check to see if any additional specs can be found.
+          additionalSpecPath = settings.get(
+            "python.dataScience.gatherSpecPath"
+          );
+        }
+
         if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
           ppa.addSpecFolder(additionalSpecPath);
         } else {
