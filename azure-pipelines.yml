@@ -6,7 +6,7 @@
 trigger: none
 schedules:
   - cron: "0 0 * * sat"
-    displayName: Weekly Performance Test
+    displayName: Unit Tests
     branches:
       include:
         - master
