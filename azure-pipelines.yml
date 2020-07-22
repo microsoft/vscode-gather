@@ -25,15 +25,15 @@ steps:
     inputs:
       workingFile: .npmrc
 
-  # - task: Npm@1
-  #   displayName: "npm install"
-  #   inputs:
-  #     verbose: false
-
-  - script: |
-      npm install
+  - task: Npm@1
     displayName: "npm install"
+    inputs:
+      verbose: false
 
-  - script: |
-      npm run mocha
-    displayName: "run unit tests"
+  # - script: |
+  #     npm install
+  #   displayName: "npm install"
+
+  # - script: |
+  #     npm run mocha
+  #   displayName: "run unit tests"
