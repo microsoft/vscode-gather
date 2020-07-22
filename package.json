@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
+    "vscode:prepublish1": "webpack --mode development",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
     "test-compile": "tsc -p ./",
@@ -39,9 +40,9 @@
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "test": "node ./out/test/runTest.js",
     "vsix": "vsce package",
-    "npm-auth": "vsts-npm-auth -config .npmrc"
+    "npm-auth": "vsts-npm-auth -config .npmrc",
+    "mocha": "mocha --config ./src/test/.mocha.config.json"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
@@ -54,10 +55,12 @@
     "eslint": "^6.8.0",
     "filemanager-webpack-plugin-fixed": "^2.0.9",
     "glob": "^7.1.6",
-    "mocha": "^7.1.2",
+    "mocha": "^7.2.0",
     "terser-webpack-plugin": "^3.0.6",
     "ts-loader": "^7.0.5",
-    "typescript": "^3.8.3",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "typemoq": "^2.1.0",
     "vscode-test": "^1.3.0",
     "vsts-npm-auth": "^0.41.0",
     "webpack": "^5.0.0-alpha.13",
