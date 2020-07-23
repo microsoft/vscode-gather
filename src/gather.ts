@@ -141,6 +141,7 @@ export class GatherProvider implements IGatherProvider {
       }
     } catch (ex) {
       console.error(`Gathering tools could't be activated. ${util.format(ex)}`);
+      throw ex;
     }
   }
 }
