@@ -44,6 +44,7 @@ export class GatherProvider implements IGatherProvider {
         "Gather: Error logging execution on cell:\n" + vscCell.data.source[0],
         e
       );
+      throw e;
     }
   }
 
@@ -56,6 +57,7 @@ export class GatherProvider implements IGatherProvider {
       }
     } catch (e) {
       window.showErrorMessage("Gather: Error resetting log", e);
+      throw e;
     }
   }
 
