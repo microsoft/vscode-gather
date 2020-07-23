@@ -8,23 +8,18 @@ trigger:
     include:
       - "*"
 
-pool: "GatherPool"
+pool:
+  vmImage: "ubuntu-16.04"
 
 steps:
   - task: npmAuthenticate@0
     displayName: "npm Authenticate .npmrc"
     inputs:
       workingFile: .npmrc
-
   # - task: Npm@1
   #   displayName: "npm install"
   #   inputs:
   #     verbose: false
-
-  - script: |
-      npm install tsc
-      npm run compile
-    displayName: "compile"
   # - script: |
   #     npm run mocha
   #   displayName: "run unit tests"
