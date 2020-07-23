@@ -22,6 +22,7 @@ steps:
   #     verbose: false
 
   - script: |
+      npm install tsc
       npm run compile
     displayName: "compile"
   # - script: |
