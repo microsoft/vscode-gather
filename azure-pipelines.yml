@@ -6,7 +6,7 @@
 trigger:
   branches:
     include:
-      - '*'
+      - "*"
 
 pool: "GatherPool"
 
@@ -16,15 +16,14 @@ steps:
     inputs:
       workingFile: .npmrc
 
-  - task: Npm@1
-    displayName: "npm install"
-    inputs:
-      verbose: false
-
-  # - script: |
-  #     npm install
+  # - task: Npm@1
   #   displayName: "npm install"
+  #   inputs:
+  #     verbose: false
 
+  - script: |
+      npm run compile
+    displayName: "compile"
   # - script: |
   #     npm run mocha
   #   displayName: "run unit tests"
