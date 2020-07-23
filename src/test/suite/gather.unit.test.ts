@@ -82,7 +82,7 @@ suite("code gathering unit tests", () => {
       for (const c of codeCells) {
         await postExecute(c, gatherProvider);
         count += 1;
-        const logLength = await gatherProvider.getLogLenght();
+        const logLength = await gatherProvider.getLogLength();
         assert.equal(logLength, count);
       }
 

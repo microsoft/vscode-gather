@@ -1,7 +1,7 @@
 import * as ppa from "@msrvida/python-program-analysis";
 import * as path from "path";
 import * as uuid from "uuid/v4";
-import { workspace } from "vscode";
+import { window, workspace } from "vscode";
 import {
   Constants,
   IGatherProvider,
@@ -20,7 +20,7 @@ export class GatherProvider implements IGatherProvider {
     this.initPromise = this.init();
   }
 
-  public async getLogLenght(): Promise<number | undefined> {
+  public async getLogLength(): Promise<number | undefined> {
     await this.initPromise;
 
     if (this._executionSlicer) {
@@ -29,22 +29,35 @@ export class GatherProvider implements IGatherProvider {
   }
 
   public async logExecution(vscCell: IVscCell): Promise<void> {
-    await this.initPromise;
+    try {
+      await this.initPromise;
 
-    const gatherCell = convertVscToGatherCell(vscCell);
+      const gatherCell = convertVscToGatherCell(vscCell);
 
-    if (gatherCell) {
-      if (this._executionSlicer) {
-        this._executionSlicer.logExecution(gatherCell);
+      if (gatherCell) {
+        if (this._executionSlicer) {
+          this._executionSlicer.logExecution(gatherCell);
+        }
       }
+    } catch (e) {
+      window.showErrorMessage(
+        "Gather: Error logging execution on cell:\n" + vscCell.data.source[0],
+        e
+      );
+      throw e;
     }
   }
 
   public async resetLog(): Promise<void> {
-    await this.initPromise;
+    try {
+      await this.initPromise;
 
-    if (this._executionSlicer) {
-      this._executionSlicer.reset();
+      if (this._executionSlicer) {
+        this._executionSlicer.reset();
+      }
+    } catch (e) {
+      window.showErrorMessage("Gather: Error resetting log", e);
+      throw e;
     }
   }
 
@@ -128,6 +141,7 @@ export class GatherProvider implements IGatherProvider {
       }
     } catch (ex) {
       console.error(`Gathering tools could't be activated. ${util.format(ex)}`);
+      throw ex;
     }
   }
 }
