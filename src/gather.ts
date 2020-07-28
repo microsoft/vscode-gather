@@ -1,7 +1,7 @@
 import * as ppa from "@msrvida/python-program-analysis";
 import * as path from "path";
 import * as uuid from "uuid/v4";
-import { window, workspace } from "vscode";
+import { window, workspace, StatusBarItem, StatusBarAlignment } from "vscode";
 import {
   Constants,
   IGatherProvider,
@@ -15,9 +15,15 @@ export class GatherProvider implements IGatherProvider {
   private _executionSlicer: ppa.ExecutionLogSlicer<ppa.Cell> | undefined;
   private dataflowAnalyzer: ppa.DataflowAnalyzer | undefined;
   private initPromise: Promise<void>;
+  private statusBar: StatusBarItem;
 
   constructor(private readonly extensionPath: string) {
+    this.statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
     this.initPromise = this.init();
+  }
+
+  public dispose() {
+    this.statusBar.dispose();
   }
 
   public async getLogLength(): Promise<number | undefined> {
@@ -69,8 +75,11 @@ export class GatherProvider implements IGatherProvider {
       return "# %% [markdown]\n## Gather not available";
     }
 
+    this.statusBar.text = "Gathering Code";
+
     const gatherCell = convertVscToGatherCell(vscCell);
     if (!gatherCell) {
+      this.statusBar.text = "";
       return "";
     }
 
@@ -89,9 +98,12 @@ export class GatherProvider implements IGatherProvider {
     const slice = this._executionSlicer.sliceLatestExecution(
       gatherCell.persistentId
     );
+
+    this.statusBar.text = "";
     return slice.cellSlices
       .reduce(concat, "")
-      .replace(/#%%/g, defaultCellMarker);
+      .replace(/#%%/g, defaultCellMarker)
+      .trim();
   }
 
   private async init(): Promise<void> {
