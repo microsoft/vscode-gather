@@ -89,9 +89,11 @@ export class GatherProvider implements IGatherProvider {
     const slice = this._executionSlicer.sliceLatestExecution(
       gatherCell.persistentId
     );
+
     return slice.cellSlices
       .reduce(concat, "")
-      .replace(/#%%/g, defaultCellMarker);
+      .replace(/#%%/g, defaultCellMarker)
+      .trim();
   }
 
   private async init(): Promise<void> {
