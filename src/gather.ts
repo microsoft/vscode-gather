@@ -7,7 +7,7 @@ import {
   IGatherProvider,
   CellState,
   ICell as IVscCell,
-} from "./types";
+} from "./types/types";
 import { pathExists } from "./helpers";
 import * as util from "util";
 
