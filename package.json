@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
-    "@msrvida/python-program-analysis": "^0.4.42",
+    "@msrvida/python-program-analysis": "^0.4.45",
     "@types/uuid": "^3.4.3",
     "path": "^0.12.7",
     "uuid": "^3.3.2",
