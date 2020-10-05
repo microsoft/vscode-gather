@@ -1,76 +1,71 @@
 "use strict";
 import * as vscode from "vscode";
-import { IGatherProvider, ICell, CellState } from "./types/types";
+import { IGatherProvider, IGatherProviderOld } from "./types/types";
 import { GatherProvider } from "./gather";
-import { IPythonExtensionApi } from "./types/python";
+import { GatherProviderOld } from "./gatherOld";
+import { IJupyterExtensionApi } from "./types/jupyter";
+import { gatherCommand, gatherTooltip, jupyterExtension } from "./helpers";
 
 export async function activate(context: vscode.ExtensionContext) {
-  const python = vscode.extensions.getExtension<IPythonExtensionApi>(
-    "ms-python.python"
+  const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(
+    jupyterExtension
   );
 
-  if (python) {
-    if (!python.isActive) {
-      await python.activate();
-      await python.exports.ready;
+  if (jupyter) {
+    if (!jupyter.isActive) {
+      await jupyter.activate();
+      await jupyter.exports.ready;
     }
 
     let provider: IGatherProvider;
+    vscode.commands.registerCommand(gatherCommand, (cell: vscode.NotebookCell) => provider.gatherCode(cell));
     vscode.notebook.onDidOpenNotebookDocument((e) => {
-      provider = new GatherProvider(context.extensionPath);
-
-      // add gather button to notebooks
-      // https://github.com/microsoft/vscode-github-issue-notebooks/blob/master/src/renderer/icons.tsx
-      e.cells.forEach((cell) => {
-        if (
-          cell.metadata.runState &&
-          cell.metadata.runState !== vscode.NotebookCellRunState.Error
-        ) {
-          vscode.notebook.createCellStatusBarItem(cell);
-        }
-      });
+      provider = new GatherProvider(context.extensionPath, getLanguages(e));
     });
-    python.exports.datascience.onKernelRestart(() => provider.resetLog());
-    python.exports.datascience.onKernelPostExecute(
-      (cell: vscode.NotebookCell) => provider.logExecution(convertCell(cell))
+    jupyter.exports.onKernelRestart(() => provider.resetLog());
+    jupyter.exports.onKernelPostExecute(
+      (cell: vscode.NotebookCell) => {
+        provider.logExecution(cell);
+        // add gather button to notebooks
+        // https://github.com/microsoft/vscode-github-issue-notebooks/blob/master/src/renderer/icons.tsx
+        addGatherButton(cell);
+      }
     );
   }
-
-  // let api = {
-  //   getGatherProvider(): IGatherProvider {
-  //     return new GatherProvider(context.extensionPath);
-  //   },
-  // };
-
-  // return api;
 }
 
 export function deactivate() {}
 
-function convertCell(cell: vscode.NotebookCell): ICell {
-  return {
-    id: cell.document.uri.toString(),
-    file: cell.document.fileName,
-    line: 0,
-    state: convertCellStatus(cell.metadata.runState),
-    data: {
-      source: cell.document.getText(),
-      execution_count: cell.metadata.executionOrder
-        ? cell.metadata.executionOrder
-        : 0,
-      outputs: [],
-      metadata: {},
-      cell_type: "code",
+export function getGatherProviderOld(context: vscode.ExtensionContext) {
+  let api = {
+    getGatherProvider(): IGatherProviderOld {
+      return new GatherProviderOld(context.extensionPath);
     },
   };
+
+  return api;
 }
 
-function convertCellStatus(
-  runState: vscode.NotebookCellRunState | undefined
-): CellState {
-  if (runState && runState === vscode.NotebookCellRunState.Error) {
-    return CellState.error;
+function addGatherButton(cell: vscode.NotebookCell) {
+  if (
+    cell.metadata.runState &&
+    cell.metadata.runState !== vscode.NotebookCellRunState.Error
+  ) {
+    const button = vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
+    button.command = gatherCommand;
+    button.text = 'Gather';
+    button.tooltip = gatherTooltip;
+    button.show();
   }
+}
 
-  return CellState.finished;
+function getLanguages(doc: vscode.NotebookDocument): string[] {
+  let languages: string[] = [];
+  doc.cells.forEach(cell => {
+    if (cell.language) {
+      languages.push(cell.language);
+    }
+  });
+
+  return languages;
 }

@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality to the Python Extension",
-  "version": "2020.7.1",
+  "version": "2020.9.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
@@ -16,16 +16,31 @@
     "url": "https://github.com/Microsoft/vscode-python/issues"
   },
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.48.0"
   },
   "categories": [
     "Other"
   ],
   "icon": "icon.png",
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [
+      {
+        "command": "gather.gatherCode",
+        "title": "Gather code"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "gather.gatherCode",
+          "when": "false"
+        }
+      ]
+    }
   },
   "extensionDependencies": [
     "ms-python.python"

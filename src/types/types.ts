@@ -1,24 +1,17 @@
 import type { nbformat } from "@jupyterlab/coreutils";
-import {
-  Event,
-  NotebookDocument,
-  NotebookKernel,
-  NotebookEditor,
-  NotebookContentProvider,
-  NotebookCellMetadata,
-  Disposable,
-  NotebookDocumentFilter,
-  NotebookKernelProvider,
-  NotebookCellsChangeEvent,
-  NotebookCellOutputsChangeEvent,
-  NotebookCellLanguageChangeEvent,
-} from "vscode";
+import * as vscode from "vscode";
 
 export namespace Constants {
   export const DefaultCodeCellMarker = "# %%";
 }
 
 export interface IGatherProvider {
+  logExecution(vscCell: vscode.NotebookCell): void;
+  gatherCode(vscCell: vscode.NotebookCell): Promise<string>;
+  resetLog(): void;
+}
+
+export interface IGatherProviderOld {
   logExecution(vscCell: ICell): void;
   gatherCode(vscCell: ICell): string;
   resetLog(): void;
@@ -51,26 +44,26 @@ export interface IMessageCell extends nbformat.IBaseCell {
 }
 
 export type NotebookCellChangedEvent =
-  | NotebookCellsChangeEvent
-  | NotebookCellOutputsChangeEvent
-  | NotebookCellLanguageChangeEvent;
+  | vscode.NotebookCellsChangeEvent
+  | vscode.NotebookCellOutputsChangeEvent
+  | vscode.NotebookCellLanguageChangeEvent;
 
 export const IVSCodeNotebook = Symbol("IVSCodeNotebook");
 export interface IVSCodeNotebook {
-  readonly onDidChangeActiveNotebookKernel: Event<{
-    document: NotebookDocument;
-    kernel: NotebookKernel | undefined;
+  readonly onDidChangeActiveNotebookKernel: vscode.Event<{
+    document: vscode.NotebookDocument;
+    kernel: vscode.NotebookKernel | undefined;
   }>;
-  readonly notebookDocuments: ReadonlyArray<NotebookDocument>;
-  readonly onDidOpenNotebookDocument: Event<NotebookDocument>;
-  readonly onDidCloseNotebookDocument: Event<NotebookDocument>;
-  readonly onDidChangeActiveNotebookEditor: Event<NotebookEditor | undefined>;
-  readonly onDidChangeNotebookDocument: Event<NotebookCellChangedEvent>;
-  readonly notebookEditors: Readonly<NotebookEditor[]>;
-  readonly activeNotebookEditor: NotebookEditor | undefined;
+  readonly notebookDocuments: ReadonlyArray<vscode.NotebookDocument>;
+  readonly onDidOpenNotebookDocument: vscode.Event<vscode.NotebookDocument>;
+  readonly onDidCloseNotebookDocument: vscode.Event<vscode.NotebookDocument>;
+  readonly onDidChangeActiveNotebookEditor: vscode.Event<vscode.NotebookEditor | undefined>;
+  readonly onDidChangeNotebookDocument: vscode.Event<NotebookCellChangedEvent>;
+  readonly notebookEditors: Readonly<vscode.NotebookEditor[]>;
+  readonly activeNotebookEditor: vscode.NotebookEditor | undefined;
   registerNotebookContentProvider(
     notebookType: string,
-    provider: NotebookContentProvider,
+    provider: vscode.NotebookContentProvider,
     options?: {
       /**
        * Controls if outputs change will trigger notebook document content change and if it will be used in the diff editor
@@ -81,12 +74,12 @@ export interface IVSCodeNotebook {
        * Controls if a meetadata property change will trigger notebook document content change and if it will be used in the diff editor
        * Default to false. If the content provider doesn't persisit a metadata property in the file document, it should be set to true.
        */
-      transientMetadata: { [K in keyof NotebookCellMetadata]?: boolean };
+      transientMetadata: { [K in keyof vscode.NotebookCellMetadata]?: boolean };
     }
-  ): Disposable;
+  ): vscode.Disposable;
 
   registerNotebookKernelProvider(
-    selector: NotebookDocumentFilter,
-    provider: NotebookKernelProvider
-  ): Disposable;
+    selector: vscode.NotebookDocumentFilter,
+    provider: vscode.NotebookKernelProvider
+  ): vscode.Disposable;
 }

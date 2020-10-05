@@ -28,3 +28,8 @@ export async function pathExists(
   }
   return (stat.type & fileType) === fileType;
 }
+
+export const jupyterExtension = 'ms-ai-tools.jupyter'; // 'ms-toolsai.jupyter';
+export const gatherCommand = 'gather.gatherCode';
+export const gatherTooltip = 'Gather the code required to generate this cell into a new notebook';
+export const PYTHON_LANGUAGE = 'python';
