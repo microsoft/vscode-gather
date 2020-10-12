@@ -1,46 +1,50 @@
-import type { nbformat } from "@jupyterlab/coreutils";
 import * as vscode from "vscode";
+import * as path from 'path';
 
 export namespace Constants {
+  const folderName = path.basename(__dirname);
+  export const EXTENSION_ROOT_DIR = folderName === 'client' ? path.join(__dirname, '..', '..') : path.join(__dirname, '..', '..', '..', '..');
+  export const GatherExtension = 'ms-python.gather';
   export const DefaultCodeCellMarker = "# %%";
+  export const jupyterExtension = 'ms-ai-tools.jupyter'; // 'ms-toolsai.jupyter';
+  export const gatherInteractiveCommand = 'gather.gatherCodeInteractive';
+  export const gatherWebviewNotebookCommand = 'gather.gatherCodeWebviewNotebook';
+  export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
+  export const gatherQualityCommand = 'gather.quality';
+  export const gatherToScriptSetting = 'gather.gatherToScript';
+  export const gatherSpecPathSetting = 'gather.gatherSpecPath';
+  export const gatherTooltip = 'Gather the code required to generate this cell into a new notebook';
+  export const PYTHON_LANGUAGE = 'python';
+  export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
+  export const openNotebookCommand = 'jupyter.opennotebook';
+  export const openPreviewNotebookCommand = 'jupyter.opennotebookInPreviewEditor';
+}
+
+export enum Telemetry {
+  GatherIsInstalled = 'DS_INTERNAL.GATHER_IS_INSTALLED',
+  GatherCompleted = 'DATASCIENCE.GATHER_COMPLETED',
+  GatherStats = 'DS_INTERNAL.GATHER_STATS',
+  GatherException = 'DS_INTERNAL.GATHER_EXCEPTION',
+  GatheredNotebookSaved = 'DATASCIENCE.GATHERED_NOTEBOOK_SAVED',
+  GatherQualityReport = 'DS_INTERNAL.GATHER_QUALITY_REPORT',
+}
+
+export enum OSType {
+  Unknown = 'Unknown',
+  Windows = 'Windows',
+  OSX = 'OSX',
+  Linux = 'Linux'
+}
+
+export interface SimpleCell {
+  source: string;
+  type: string;
 }
 
 export interface IGatherProvider {
   logExecution(vscCell: vscode.NotebookCell): void;
-  gatherCode(vscCell: vscode.NotebookCell): Promise<string>;
+  gatherCode(vscCell: vscode.NotebookCell, toScript: boolean, preview: boolean): Promise<void>;
   resetLog(): void;
-}
-
-export interface IGatherProviderOld {
-  logExecution(vscCell: ICell): void;
-  gatherCode(vscCell: ICell): string;
-  resetLog(): void;
-}
-
-export interface ICell {
-  id: string; // This value isn't unique. File and line are needed too.
-  file: string;
-  line: number;
-  state: CellState;
-  data:
-    | nbformat.ICodeCell
-    | nbformat.IRawCell
-    | nbformat.IMarkdownCell
-    | IMessageCell;
-  extraLines?: number[];
-}
-
-export enum CellState {
-  editing = -1,
-  init = 0,
-  executing = 1,
-  finished = 2,
-  error = 3,
-}
-
-export interface IMessageCell extends nbformat.IBaseCell {
-  cell_type: "messages";
-  messages: string[];
 }
 
 export type NotebookCellChangedEvent =

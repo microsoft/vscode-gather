@@ -29,21 +29,76 @@
   "contributes": {
     "commands": [
       {
-        "command": "gather.gatherCode",
-        "title": "Gather code"
+        "command": "gather.gatherCodeInteractive",
+        "title": "Gather code interactive"
+      },
+      {
+        "command": "gather.gatherCodeWebviewNotebook",
+        "title": "Gather code webview notebook"
+      },
+      {
+        "command": "gather.gatherCodeNativeNotebook",
+        "title": "Gather code",
+        "icon": "$(group-by-ref-type)"
+      },
+      {
+        "command": "gather.quality",
+        "title": "Gather.quality"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "gather.gatherCode",
+          "command": "gather.gatherCodeInteractive",
+          "title": "Gather code interactive",
+          "when": "false"
+        },
+        {
+          "command": "gather.gatherCodeWebviewNotebook",
+          "title": "Gather code webview notebook",
+          "when": "false"
+        },
+        {
+          "command": "gather.gatherCodeNativeNotebook",
+          "title": "Gather code",
+          "when": "false"
+        },
+        {
+          "command": "gather.quality",
+          "title": "Gather.quality",
           "when": "false"
         }
+      ],
+      "notebook/cell/title": [
+        {
+          "command": "gather.gatherCodeNativeNotebook",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellRunState != 4 && notebookCellRunState != 2",
+          "group": "inline/cell@2"
+        }
       ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Gather",
+      "properties": {
+        "gather.gatherToScript": {
+          "type": "boolean",
+          "default": false,
+          "description": "Gather code to a python script rather than a notebook.",
+          "scope": "resource"
+        },
+        "jupyter.gatherSpecPath": {
+          "type": "string",
+          "default": "",
+          "description": "This setting specifies a folder that contains additional or replacement spec files used for analysis.",
+          "scope": "resource"
+        }
+      }
     }
   },
   "extensionDependencies": [
-    "ms-python.python"
+    "ms-python.python",
+    "ms-ai-tools.jupyter"
   ],
   "scripts": {
     "prepublish": "webpack --mode production",
@@ -56,9 +111,11 @@
     "test": "mocha --config ./src/test/.mocha.config.json"
   },
   "devDependencies": {
+    "@types/fs-extra": "^5.0.1",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
+    "@types/stack-trace": "0.0.29",
     "@types/vscode": "^1.47.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
@@ -67,6 +124,7 @@
     "filemanager-webpack-plugin-fixed": "^2.0.9",
     "glob": "^7.1.6",
     "mocha": "^7.2.0",
+    "monaco-editor": "0.18.1",
     "terser-webpack-plugin": "^3.0.6",
     "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
@@ -80,9 +138,15 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
     "@msrvida/python-program-analysis": "^0.4.45",
+    "@opentelemetry/api": "^0.11.0",
+    "@opentelemetry/tracing": "^0.11.0",
     "@types/uuid": "^3.4.3",
+    "fs-extra": "^4.0.3",
+    "npm": "^6.14.8",
     "path": "^0.12.7",
+    "stack-trace": "0.0.10",
     "uuid": "^3.3.2",
+    "vscode-extension-telemetry": "0.1.4",
     "webpack-bundle-analyzer": "^3.8.0"
   }
 }
