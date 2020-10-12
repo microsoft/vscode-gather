@@ -97,7 +97,7 @@
     }
   },
   "extensionDependencies": [
-    "ms-ai-tools.jupyter"
+    "ms-toolsai.jupyter"
   ],
   "scripts": {
     "prepublish": "webpack --mode production",

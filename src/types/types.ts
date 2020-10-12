@@ -6,7 +6,7 @@ export namespace Constants {
   export const EXTENSION_ROOT_DIR = folderName === 'client' ? path.join(__dirname, '..', '..') : path.join(__dirname, '..', '..', '..', '..');
   export const GatherExtension = 'ms-python.gather';
   export const DefaultCodeCellMarker = "# %%";
-  export const jupyterExtension = 'ms-ai-tools.jupyter'; // 'ms-toolsai.jupyter';
+  export const jupyterExtension = 'ms-toolsai.jupyter';
   export const gatherInteractiveCommand = 'gather.gatherCodeInteractive';
   export const gatherWebviewNotebookCommand = 'gather.gatherCodeWebviewNotebook';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
