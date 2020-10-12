@@ -97,7 +97,6 @@
     }
   },
   "extensionDependencies": [
-    "ms-python.python",
     "ms-ai-tools.jupyter"
   ],
   "scripts": {
