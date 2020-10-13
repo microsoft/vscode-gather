@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { Constants, IGatherProvider, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
-import { IJupyterExtensionApi } from "./types/jupyter";
+import { IJupyterExtensionApi, IWebviewOpenedMessage } from "./types/jupyter";
 import { sendTelemetryEvent } from "./telemetry";
 
 export async function activate() {
@@ -55,8 +55,14 @@ export async function activate() {
           item.hide();
         });
       });
-      jupyter.exports.onOpenWebview((languages: string[]) => {
-        provider = new GatherProvider(languages);
+      jupyter.exports.onOpenWebview((msg: IWebviewOpenedMessage) => {
+        provider = new GatherProvider(msg.languages);
+
+        if (msg.isInteractive) {
+          jupyter.exports.registerCellCommand(Constants.gatherInteractiveCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], true);
+        } else {
+          jupyter.exports.registerCellCommand(Constants.gatherWebviewNotebookCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], false);
+        }
       });
 
       jupyter.exports.onKernelRestart(() => provider.resetLog());
@@ -68,7 +74,21 @@ export async function activate() {
   }
 }
 
-export function deactivate() {}
+export async function deactivate() {
+  const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(
+    Constants.jupyterExtension
+  );
+
+  if (jupyter) {
+    if (!jupyter.isActive) {
+      await jupyter.activate();
+      await jupyter.exports.ready;
+    }
+
+    jupyter.exports.removeCellCommand(Constants.gatherInteractiveCommand, true);
+    jupyter.exports.removeCellCommand(Constants.gatherWebviewNotebookCommand, false);
+  }
+}
 
 function getLanguages(doc: vscode.NotebookDocument): string[] {
   let languages: string[] = [];
