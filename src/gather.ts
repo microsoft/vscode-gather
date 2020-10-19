@@ -193,7 +193,9 @@ export class GatherProvider implements IGatherProvider {
       gatheredCode = gatheredCode.replace(re, '');
     }
 
-    const annotatedScript = `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
+    const annotatedScript = vscode.env?.uiKind === vscode.UIKind?.Web
+      ? `${localize.Common.gatheredScriptDescriptionWithoutSurvey()}${defaultCellMarker}\n${gatheredCode}`
+      : `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
 
     // Don't want to open the gathered code on top of the interactive window
     let viewColumn: vscode.ViewColumn | undefined;
@@ -221,7 +223,9 @@ export class GatherProvider implements IGatherProvider {
   private async showNotebook(gatheredCode: string, preview: boolean) {
     let cells: SimpleCell[] = [
       {
-        source: localize.Common.gatheredNotebookDescriptionInMarkdown(),
+        source: vscode.env.uiKind === vscode.UIKind?.Web
+          ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
+          : localize.Common.gatheredNotebookDescriptionInMarkdown(),
         type: 'markdown'
       }
     ];
