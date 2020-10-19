@@ -89,7 +89,7 @@ export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extend
       if (!isTestExecution() && telemetryReporter) {
           return telemetryReporter;
       }
-      const extensionId = Constants.GatherExtension;
+      const extensionId = Constants.PythonExtension;
       // tslint:disable-next-line:no-require-imports
       const extensions = (require('vscode') as typeof import('vscode')).extensions;
       const extension = extensions.getExtension(extensionId)!;

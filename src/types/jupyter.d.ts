@@ -5,17 +5,12 @@ export interface IJupyterExtensionApi {
     ready: Promise<void>;
     readonly onKernelPostExecute: Event<NotebookCell>;
     readonly onKernelRestart: Event<void>;
-    readonly onOpenWebview: Event<IWebviewOpenedMessage>;
+    readonly onKernelStart: Event<string[]>;
     registerCellCommand(
         command: string,
         buttonHtml: string,
         statusToEnable: NotebookCellRunState[],
-        interactive: boolean
+        tooltip: string
     ): void;
-    removeCellCommand(command: string, interactive: boolean): void;
-}
-
-export interface IWebviewOpenedMessage {
-    languages: string[];
-    isInteractive: boolean;
+    removeCellCommand(command: string): void;
 }

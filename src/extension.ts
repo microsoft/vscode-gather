@@ -2,8 +2,9 @@
 import * as vscode from "vscode";
 import { Constants, IGatherProvider, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
-import { IJupyterExtensionApi, IWebviewOpenedMessage } from "./types/jupyter";
+import { IJupyterExtensionApi } from "./types/jupyter";
 import { sendTelemetryEvent } from "./telemetry";
+import * as localize from './localize';
 
 export async function activate() {
   try {
@@ -21,11 +22,8 @@ export async function activate() {
       }
 
       let provider: IGatherProvider;
-      vscode.commands.registerCommand(Constants.gatherInteractiveCommand, async (cell: vscode.NotebookCell) => {
-        provider.gatherCode(cell, true, false);
-      });
-      vscode.commands.registerCommand(Constants.gatherWebviewNotebookCommand, async (cell: vscode.NotebookCell) => {
-        provider.gatherCode(cell, false, false);
+      vscode.commands.registerCommand(Constants.gatherWebviewCommand, async (cell: vscode.NotebookCell, isInteractive: boolean) => {
+        provider.gatherCode(cell, isInteractive, false);
       });
       vscode.commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: vscode.NotebookCell) => {
         const item = cellStatusBarItems.get(cell);
@@ -51,18 +49,14 @@ export async function activate() {
         notebook.cells.forEach(cell => {
           const item = cellStatusBarItems.get(cell) ?? vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
           cellStatusBarItems.set(cell, item);
-          item.text = 'Gathering $(sync)';
+          item.text = 'Gathering $(sync~spin)';
           item.hide();
         });
       });
-      jupyter.exports.onOpenWebview((msg: IWebviewOpenedMessage) => {
-        provider = new GatherProvider(msg.languages);
+      jupyter.exports.onKernelStart((languages: string[]) => {
+        provider = new GatherProvider(languages);
 
-        if (msg.isInteractive) {
-          jupyter.exports.registerCellCommand(Constants.gatherInteractiveCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], true);
-        } else {
-          jupyter.exports.registerCellCommand(Constants.gatherWebviewNotebookCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], false);
-        }
+        jupyter.exports.registerCellCommand(Constants.gatherWebviewCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], localize.Common.gatherTooltip());
       });
 
       jupyter.exports.onKernelRestart(() => provider.resetLog());
@@ -85,8 +79,7 @@ export async function deactivate() {
       await jupyter.exports.ready;
     }
 
-    jupyter.exports.removeCellCommand(Constants.gatherInteractiveCommand, true);
-    jupyter.exports.removeCellCommand(Constants.gatherWebviewNotebookCommand, false);
+    jupyter.exports.removeCellCommand(Constants.gatherWebviewCommand);
   }
 }
 

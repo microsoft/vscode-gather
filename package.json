@@ -29,12 +29,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "gather.gatherCodeInteractive",
-        "title": "Gather code interactive"
-      },
-      {
-        "command": "gather.gatherCodeWebviewNotebook",
-        "title": "Gather code webview notebook"
+        "command": "gather.gatherCodeWebview",
+        "title": "Gather code webview"
       },
       {
         "command": "gather.gatherCodeNativeNotebook",
@@ -49,13 +45,8 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "gather.gatherCodeInteractive",
-          "title": "Gather code interactive",
-          "when": "false"
-        },
-        {
-          "command": "gather.gatherCodeWebviewNotebook",
-          "title": "Gather code webview notebook",
+          "command": "gather.gatherCodeWebview",
+          "title": "Gather code webview",
           "when": "false"
         },
         {

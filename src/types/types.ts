@@ -5,10 +5,10 @@ export namespace Constants {
   const folderName = path.basename(__dirname);
   export const EXTENSION_ROOT_DIR = folderName === 'client' ? path.join(__dirname, '..', '..') : path.join(__dirname, '..', '..', '..', '..');
   export const GatherExtension = 'ms-python.gather';
+  export const PythonExtension = 'ms-python.python';
   export const DefaultCodeCellMarker = "# %%";
   export const jupyterExtension = 'ms-toolsai.jupyter';
-  export const gatherInteractiveCommand = 'gather.gatherCodeInteractive';
-  export const gatherWebviewNotebookCommand = 'gather.gatherCodeWebviewNotebook';
+  export const gatherWebviewCommand = 'gather.gatherCodeWebview';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
   export const gatherQualityCommand = 'gather.quality';
   export const gatherToScriptSetting = 'gather.gatherToScript';
