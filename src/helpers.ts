@@ -57,9 +57,15 @@ export function concat(existingText: string, newText: ppa.CellSlice): string {
  * @param cell A cell object conforming to the VS Code cell interface
  */
 export function convertVscToGatherCell(cell: vscode.NotebookCell): ppa.Cell | undefined {
+  let code = '';
+  if (cell.document) {
+    code = cell.document.getText();
+  } else {
+    code = (<any>cell).code as string;
+  }
   // This should always be true since we only want to log code cells. Putting this here so types match for outputs property
   const result: ppa.Cell = {
-    text: cell.document.getText(),
+    text: code,
 
     executionCount: cell.metadata.executionOrder,
     executionEventId: uuid(),
@@ -130,15 +136,20 @@ export function createNotebookContent(cells: SimpleCell[]): string {
   const metadata = {
     language_info: {},
     orig_nbformat: 2,
-    kernelspec: {}
+    kernelspec: {
+      display_name: '',
+      name: ''
+    }
   };
 
   const json = {
     cells: cells.map((cell) => {
       return {
-        source: splitLines(cell.source, { removeEmptyEntries: false, trim: false }),
+        source: cell.source,
         cell_type: cell.type,
-        metadata: {}
+        metadata: {},
+        execution_count: 0,
+        outputs: []
       };
     }),
     nbformat: 4,
@@ -157,7 +168,7 @@ export function generateCellsFromString(script: string): SimpleCell[] {
     settings.get(Constants.defaultCellMarkerSetting) as string :
     Constants.DefaultCodeCellMarker;
 
-  let cellCode = '';
+  let cellCode: string[] = [];
 
   for (let index = 0; index < lines.length; index++) {
     if (lines[index].indexOf(defaultCellMarker) === 0) {
@@ -167,14 +178,20 @@ export function generateCellsFromString(script: string): SimpleCell[] {
             source: cellCode,
             type: 'code'
           });
+          cellCode = [];
           index = j - 1;
           break;
         } else {
-          cellCode += lines[j];
+          cellCode.push(lines[j]);
         }
       }
     }
   }
+
+  cells.push({
+    source: cellCode,
+    type: 'code'
+  });
 
   return cells;
 }

@@ -23,7 +23,10 @@
   ],
   "icon": "icon.png",
   "activationEvents": [
-    "*"
+    "onLanguage:python",
+    "onLanguage:jupyter",
+    "onNotebook:jupyter-notebook",
+    "onCustomEditor:viewType"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -63,7 +66,7 @@
       "notebook/cell/title": [
         {
           "command": "gather.gatherCodeNativeNotebook",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellRunState != 4 && notebookCellRunState != 2",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && && notebookCellRunState == 3",
           "group": "inline/cell@2"
         }
       ]

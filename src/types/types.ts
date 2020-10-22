@@ -16,8 +16,8 @@ export namespace Constants {
   export const gatherTooltip = 'Gather the code required to generate this cell into a new notebook';
   export const PYTHON_LANGUAGE = 'python';
   export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
-  export const openNotebookCommand = 'jupyter.opennotebook';
-  export const openPreviewNotebookCommand = 'jupyter.opennotebookInPreviewEditor';
+  export const openNotebookCommand = 'jupyter.openNewNotebookWithContent';
+  export const openPreviewNotebookCommand = 'jupyter.openNewNotebookWithContentInPreviewEditor';
   // Shoould work on both light and dark themes
   export const gatherButtonHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   <defs>
@@ -43,6 +43,22 @@ export enum Telemetry {
   GatherQualityReport = 'DS_INTERNAL.GATHER_QUALITY_REPORT',
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
+export type NotebookEvent = {
+  event: KernelState;
+  languages?: string[];
+  cell?: vscode.NotebookCell;
+};
+
+export enum KernelState {
+  started,
+  executed,
+  restarted
+}
+
 export enum OSType {
   Unknown = 'Unknown',
   Windows = 'Windows',
@@ -51,7 +67,7 @@ export enum OSType {
 }
 
 export interface SimpleCell {
-  source: string;
+  source: string[];
   type: string;
 }
 

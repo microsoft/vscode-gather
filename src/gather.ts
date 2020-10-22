@@ -1,11 +1,10 @@
 import * as ppa from "@msrvida/python-program-analysis";
 import * as vscode from "vscode";
-import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
+import { Constants, IDisposable, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
 import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
 import * as localize from './localize';
 import { sendTelemetryEvent } from "./telemetry";
-import { IDisposable } from 'monaco-editor';
 
 export class GatherProvider implements IGatherProvider {
   private _executionSlicer: ppa.ExecutionLogSlicer<ppa.Cell> | undefined;
@@ -88,7 +87,8 @@ export class GatherProvider implements IGatherProvider {
       const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
 
       if (gatherToScript) {
-        await this.showFile(gatheredCode, vscCell.notebook.fileName);
+        const filename = vscCell.notebook?.fileName || '';
+        await this.showFile(gatheredCode, filename);
         sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
       } else {
         await this.showNotebook(gatheredCode, preview);
@@ -224,19 +224,19 @@ export class GatherProvider implements IGatherProvider {
     let cells: SimpleCell[] = [
       {
         source: vscode.env.uiKind === vscode.UIKind?.Web
-          ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
-          : localize.Common.gatheredNotebookDescriptionInMarkdown(),
+          ? [localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()]
+          : [localize.Common.gatheredNotebookDescriptionInMarkdown()],
         type: 'markdown'
       }
     ];
     cells = cells.concat(generateCellsFromString(gatheredCode));
-    let file = vscode.Uri.parse(createNotebookContent(cells));
+    const notebook = createNotebookContent(cells);
     let editor: any;
 
     if (preview) {
-      editor = await vscode.commands.executeCommand(Constants.openPreviewNotebookCommand, file);
+      editor = await vscode.commands.executeCommand(Constants.openPreviewNotebookCommand, notebook);
     } else {
-      editor = await vscode.commands.executeCommand(Constants.openNotebookCommand, file);
+      editor = await vscode.commands.executeCommand(Constants.openNotebookCommand, notebook);
     }
     
     let disposableNotebookSaved: IDisposable;

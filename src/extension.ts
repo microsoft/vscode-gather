@@ -1,10 +1,12 @@
 "use strict";
 import * as vscode from "vscode";
-import { Constants, IGatherProvider, Telemetry } from "./types/types";
+import { Constants, IDisposable, IGatherProvider, KernelState, NotebookEvent, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
 import { IJupyterExtensionApi } from "./types/jupyter";
 import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
+
+const registeredButtons: IDisposable[] = [];
 
 export async function activate() {
   try {
@@ -41,26 +43,30 @@ export async function activate() {
         vscode.env.openExternal(vscode.Uri.parse(`https://aka.ms/gatherfeedback?succeed=${val[0]}`));
       });
 
-      vscode.notebook.onDidOpenNotebookDocument((notebook) => {
-        provider = new GatherProvider(getLanguages(notebook));
+      // vscode.notebook.onDidOpenNotebookDocument((notebook) => {
+      //   provider = new GatherProvider(getLanguages(notebook));
 
-        // if (cell.metadata.runState && cell.metadata.runState !== vscode.NotebookCellRunState.Error && cell.metadata.runState !== vscode.NotebookCellRunState.Idle) {
-        // }
-        notebook.cells.forEach(cell => {
-          const item = cellStatusBarItems.get(cell) ?? vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
-          cellStatusBarItems.set(cell, item);
-          item.text = 'Gathering $(sync~spin)';
-          item.hide();
-        });
+      //   // if (cell.metadata.runState && cell.metadata.runState !== vscode.NotebookCellRunState.Error) {
+      //   // }
+      //   notebook.cells.forEach(cell => {
+      //     const item = cellStatusBarItems.get(cell) ?? vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
+      //     cellStatusBarItems.set(cell, item);
+      //     item.text = 'Gathering $(sync~spin)';
+      //     item.hide();
+      //   });
+      // });
+      jupyter.exports.onKernelStateChange((nbEvent: NotebookEvent) => {
+        if (nbEvent.event === KernelState.started && nbEvent.languages) {
+          provider = new GatherProvider(nbEvent.languages);
+
+          const button = jupyter.exports.registerCellToolbarButton(Constants.gatherWebviewCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], localize.Common.gatherTooltip());
+          registeredButtons.push(button);
+        } else if (nbEvent.event === KernelState.restarted) {
+          provider.resetLog();
+        } else if (nbEvent.event === KernelState.executed && nbEvent.cell) {
+          provider.logExecution(nbEvent.cell);
+        }
       });
-      jupyter.exports.onKernelStart((languages: string[]) => {
-        provider = new GatherProvider(languages);
-
-        jupyter.exports.registerCellCommand(Constants.gatherWebviewCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], localize.Common.gatherTooltip());
-      });
-
-      jupyter.exports.onKernelRestart(() => provider.resetLog());
-      jupyter.exports.onKernelPostExecute((cell: vscode.NotebookCell) => provider.logExecution(cell));
     }
   } catch (e) {
     vscode.window.showErrorMessage('Gather: Exception at Activate', e);
@@ -79,17 +85,17 @@ export async function deactivate() {
       await jupyter.exports.ready;
     }
 
-    jupyter.exports.removeCellCommand(Constants.gatherWebviewCommand);
+    registeredButtons.forEach((b) => b.dispose());
   }
 }
 
-function getLanguages(doc: vscode.NotebookDocument): string[] {
-  let languages: string[] = [];
-  doc.cells.forEach(cell => {
-    if (cell.language) {
-      languages.push(cell.language);
-    }
-  });
+// function getLanguages(doc: vscode.NotebookDocument): string[] {
+//   let languages: string[] = [];
+//   doc.cells.forEach(cell => {
+//     if (cell.language) {
+//       languages.push(cell.language);
+//     }
+//   });
 
-  return languages;
-}
+//   return languages;
+// }
