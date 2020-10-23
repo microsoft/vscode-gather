@@ -60,7 +60,7 @@ export async function activate() {
         });
       });
 
-      const button = jupyter.exports.registerCellToolbarButton(Constants.gatherWebviewCommand, Constants.gatherButtonHTML, [vscode.NotebookCellRunState.Success], localize.Common.gatherTooltip());
+      const button = jupyter.exports.registerCellToolbarButton(Constants.gatherWebviewCommand, 'gather', [vscode.NotebookCellRunState.Success], localize.Common.gatherTooltip());
       registeredButtons.push(button);
 
       jupyter.exports.onKernelStateChange((nbEvent: KernelStateEventArgs) => {
