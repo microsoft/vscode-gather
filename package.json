@@ -66,7 +66,7 @@
       "notebook/cell/title": [
         {
           "command": "gather.gatherCodeNativeNotebook",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && && notebookCellRunState == 3",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellRunState == 3",
           "group": "inline/cell@2"
         }
       ]
@@ -130,6 +130,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
+    "@jupyterlab/services": "^4.2.0",
     "@msrvida/python-program-analysis": "^0.4.45",
     "@opentelemetry/api": "^0.11.0",
     "@opentelemetry/tracing": "^0.11.0",

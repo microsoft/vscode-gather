@@ -1,14 +1,14 @@
 "use strict";
-import { Event, NotebookCell, NotebookCellRunState } from "vscode";
-import { IDisposable, NotebookEvent } from './types'
+import { Disposable, Event, NotebookCell, NotebookCellRunState } from "vscode";
+import { KernelStateEventArgs } from './types'
 
 export interface IJupyterExtensionApi {
     ready: Promise<void>;
-    readonly onKernelStateChange: Event<NotebookEvent>;
+    readonly onKernelStateChange: Event<KernelStateEventArgs>;
     registerCellToolbarButton(
         command: string,
         buttonHtml: string,
         statusToEnable: NotebookCellRunState[],
         tooltip: string
-    ): IDisposable;
+    ): Disposable;
 }

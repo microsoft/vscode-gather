@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from 'path';
+import type { KernelMessage } from '@jupyterlab/services';
 
 export namespace Constants {
   const folderName = path.basename(__dirname);
@@ -16,8 +17,7 @@ export namespace Constants {
   export const gatherTooltip = 'Gather the code required to generate this cell into a new notebook';
   export const PYTHON_LANGUAGE = 'python';
   export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
-  export const openNotebookCommand = 'jupyter.openNewNotebookWithContent';
-  export const openPreviewNotebookCommand = 'jupyter.openNewNotebookWithContentInPreviewEditor';
+  export const openNotebookCommand = 'jupyter.opennotebook';
   // Shoould work on both light and dark themes
   export const gatherButtonHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   <defs>
@@ -43,13 +43,10 @@ export enum Telemetry {
   GatherQualityReport = 'DS_INTERNAL.GATHER_QUALITY_REPORT',
 }
 
-export interface IDisposable {
-  dispose(): void;
-}
-
-export type NotebookEvent = {
-  event: KernelState;
-  languages?: string[];
+export type KernelStateEventArgs = {
+  kernelId: string;
+  state: KernelState;
+  kernelMetadata?: KernelMessage.IInfoReply;
   cell?: vscode.NotebookCell;
 };
 
@@ -73,47 +70,6 @@ export interface SimpleCell {
 
 export interface IGatherProvider {
   logExecution(vscCell: vscode.NotebookCell): void;
-  gatherCode(vscCell: vscode.NotebookCell, toScript: boolean, preview: boolean): Promise<void>;
+  gatherCode(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void>;
   resetLog(): void;
-}
-
-export type NotebookCellChangedEvent =
-  | vscode.NotebookCellsChangeEvent
-  | vscode.NotebookCellOutputsChangeEvent
-  | vscode.NotebookCellLanguageChangeEvent;
-
-export const IVSCodeNotebook = Symbol("IVSCodeNotebook");
-export interface IVSCodeNotebook {
-  readonly onDidChangeActiveNotebookKernel: vscode.Event<{
-    document: vscode.NotebookDocument;
-    kernel: vscode.NotebookKernel | undefined;
-  }>;
-  readonly notebookDocuments: ReadonlyArray<vscode.NotebookDocument>;
-  readonly onDidOpenNotebookDocument: vscode.Event<vscode.NotebookDocument>;
-  readonly onDidCloseNotebookDocument: vscode.Event<vscode.NotebookDocument>;
-  readonly onDidChangeActiveNotebookEditor: vscode.Event<vscode.NotebookEditor | undefined>;
-  readonly onDidChangeNotebookDocument: vscode.Event<NotebookCellChangedEvent>;
-  readonly notebookEditors: Readonly<vscode.NotebookEditor[]>;
-  readonly activeNotebookEditor: vscode.NotebookEditor | undefined;
-  registerNotebookContentProvider(
-    notebookType: string,
-    provider: vscode.NotebookContentProvider,
-    options?: {
-      /**
-       * Controls if outputs change will trigger notebook document content change and if it will be used in the diff editor
-       * Default to false. If the content provider doesn't persisit the outputs in the file document, this should be set to true.
-       */
-      transientOutputs: boolean;
-      /**
-       * Controls if a meetadata property change will trigger notebook document content change and if it will be used in the diff editor
-       * Default to false. If the content provider doesn't persisit a metadata property in the file document, it should be set to true.
-       */
-      transientMetadata: { [K in keyof vscode.NotebookCellMetadata]?: boolean };
-    }
-  ): vscode.Disposable;
-
-  registerNotebookKernelProvider(
-    selector: vscode.NotebookDocumentFilter,
-    provider: vscode.NotebookKernelProvider
-  ): vscode.Disposable;
 }

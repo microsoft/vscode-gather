@@ -1,6 +1,6 @@
 import * as ppa from "@msrvida/python-program-analysis";
 import * as vscode from "vscode";
-import { Constants, IDisposable, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
+import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
 import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
 import * as localize from './localize';
@@ -14,7 +14,7 @@ export class GatherProvider implements IGatherProvider {
   private linesSubmitted: number = 0;
   private cellsSubmitted: number = 0;
 
-  constructor(private readonly languages: string[]) {
+  constructor(private readonly language: string) {
     this.initPromise = this.init();
   }
 
@@ -61,13 +61,13 @@ export class GatherProvider implements IGatherProvider {
       this.cellsSubmitted = 0;
       await this.initPromise;
 
-      if (this.languages.includes(Constants.PYTHON_LANGUAGE)) {
+      if (this.language === Constants.PYTHON_LANGUAGE) {
         if (this._executionSlicer) {
           this._executionSlicer.reset();
         }
       }
       
-      // if (this.languages.includes(C#)) {
+      // if (this.language === C#) {
       //   C# work
       // }
     } catch (e) {
@@ -80,7 +80,7 @@ export class GatherProvider implements IGatherProvider {
   /**
    * For a given code cell, returns a string representing a program containing all the code it depends on.
    */
-  public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false, preview: boolean = false): Promise<void> {
+  public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false): Promise<void> {
       this.gatherTimer = new StopWatch();
       const gatheredCode = this.gatherCodeInternal(vscCell);
       const settings = vscode.workspace.getConfiguration();
@@ -91,7 +91,7 @@ export class GatherProvider implements IGatherProvider {
         await this.showFile(gatheredCode, filename);
         sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
       } else {
-        await this.showNotebook(gatheredCode, preview);
+        await this.showNotebook(gatheredCode);
         sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
       }
 
@@ -147,7 +147,7 @@ export class GatherProvider implements IGatherProvider {
   }
 
   private async init(): Promise<void> {
-    if (this.languages.includes(Constants.PYTHON_LANGUAGE)) {
+    if (this.language === Constants.PYTHON_LANGUAGE) {
       try {
         if (ppa) {
           const settings = vscode.workspace.getConfiguration();
@@ -176,7 +176,7 @@ export class GatherProvider implements IGatherProvider {
       }
     }
 
-    // if (this.languages.includes('C#')) {
+    // if (this.language === 'C#') {
     //   C# work
     // }
   }
@@ -220,7 +220,7 @@ export class GatherProvider implements IGatherProvider {
     await vscode.window.showTextDocument(textDoc, viewColumn, true);
   }
 
-  private async showNotebook(gatheredCode: string, preview: boolean) {
+  private async showNotebook(gatheredCode: string) {
     let cells: SimpleCell[] = [
       {
         source: vscode.env.uiKind === vscode.UIKind?.Web
@@ -231,37 +231,7 @@ export class GatherProvider implements IGatherProvider {
     ];
     cells = cells.concat(generateCellsFromString(gatheredCode));
     const notebook = createNotebookContent(cells);
-    let editor: any;
 
-    if (preview) {
-      editor = await vscode.commands.executeCommand(Constants.openPreviewNotebookCommand, notebook);
-    } else {
-      editor = await vscode.commands.executeCommand(Constants.openNotebookCommand, notebook);
-    }
-    
-    let disposableNotebookSaved: IDisposable;
-    let disposableNotebookClosed: IDisposable;
-
-    const savedHandler = () => {
-        sendTelemetryEvent(Telemetry.GatheredNotebookSaved);
-        if (disposableNotebookSaved) {
-            disposableNotebookSaved.dispose();
-        }
-        if (disposableNotebookClosed) {
-            disposableNotebookClosed.dispose();
-        }
-    };
-
-    const closedHandler = () => {
-        if (disposableNotebookSaved) {
-            disposableNotebookSaved.dispose();
-        }
-        if (disposableNotebookClosed) {
-            disposableNotebookClosed.dispose();
-        }
-    };
-
-    disposableNotebookSaved = editor.saved(savedHandler);
-    disposableNotebookClosed = editor.closed(closedHandler);
+    await vscode.commands.executeCommand(Constants.openNotebookCommand, undefined, notebook);
   }
 }
