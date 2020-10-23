@@ -89,16 +89,5 @@ export async function activate() {
 }
 
 export async function deactivate() {
-  const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(
-    Constants.jupyterExtension
-  );
-
-  if (jupyter) {
-    if (!jupyter.isActive) {
-      await jupyter.activate();
-      await jupyter.exports.ready;
-    }
-
-    registeredButtons.forEach((b) => b.dispose());
-  }
+  registeredButtons.forEach((b) => b.dispose());
 }
