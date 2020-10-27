@@ -83,6 +83,10 @@ export class GatherProvider implements IGatherProvider {
   public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false): Promise<void> {
       this.gatherTimer = new StopWatch();
       const gatheredCode = this.gatherCodeInternal(vscCell);
+      if (gatheredCode.length === 0) {
+        return;
+      }
+
       const settings = vscode.workspace.getConfiguration();
       const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
 
@@ -135,7 +139,12 @@ export class GatherProvider implements IGatherProvider {
 
       return '# %% [markdown]\n## Gather not available in ' + vscCell.language;
     } catch (e) {
-      vscode.window.showErrorMessage('Gather: Exception at gatherCode', e);
+      // Cannot read property 'cellSlices' of undefined
+      if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {
+        vscode.window.showInformationMessage(localize.Common.runCells());
+        return "";
+      }
+      vscode.window.showErrorMessage(localize.Common.gatherError(), e);
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
       const newline = '\n';
       const settings = vscode.workspace.getConfiguration();

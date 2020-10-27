@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as path from 'path';
-import type { KernelMessage } from '@jupyterlab/services';
 
 export namespace Constants {
   const folderName = path.basename(__dirname);
@@ -9,12 +8,9 @@ export namespace Constants {
   export const PythonExtension = 'ms-python.python';
   export const DefaultCodeCellMarker = "# %%";
   export const jupyterExtension = 'ms-toolsai.jupyter';
-  export const gatherWebviewCommand = 'gather.gatherCodeWebview';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
-  export const gatherQualityCommand = 'gather.quality';
   export const gatherToScriptSetting = 'gather.gatherToScript';
   export const gatherSpecPathSetting = 'gather.gatherSpecPath';
-  export const gatherTooltip = 'Gather the code required to generate this cell into a new notebook';
   export const PYTHON_LANGUAGE = 'python';
   export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
   export const openNotebookCommand = 'jupyter.opennotebook';
@@ -44,9 +40,8 @@ export enum Telemetry {
 }
 
 export type KernelStateEventArgs = {
-  kernelId: string;
+  notebookId: string;
   state: KernelState;
-  kernelMetadata?: KernelMessage.IInfoReply;
   cell?: vscode.NotebookCell;
 };
 

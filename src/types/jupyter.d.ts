@@ -6,7 +6,8 @@ export interface IJupyterExtensionApi {
     ready: Promise<void>;
     readonly onKernelStateChange: Event<KernelStateEventArgs>;
     registerCellToolbarButton(
-        command: string,
+        buttonId: string,
+        callback: (cell: NotebookCell, isInteractive: boolean, notebookId: string) => Promise<void>,
         codicon: string,
         statusToEnable: NotebookCellRunState[],
         tooltip: string

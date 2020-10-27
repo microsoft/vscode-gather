@@ -32,41 +32,23 @@
   "contributes": {
     "commands": [
       {
-        "command": "gather.gatherCodeWebview",
-        "title": "Gather code webview"
-      },
-      {
         "command": "gather.gatherCodeNativeNotebook",
         "title": "Gather code",
         "icon": "$(group-by-ref-type)"
-      },
-      {
-        "command": "gather.quality",
-        "title": "Gather.quality"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "gather.gatherCodeWebview",
-          "title": "Gather code webview",
-          "when": "false"
-        },
-        {
           "command": "gather.gatherCodeNativeNotebook",
           "title": "Gather code",
-          "when": "false"
-        },
-        {
-          "command": "gather.quality",
-          "title": "Gather.quality",
           "when": "false"
         }
       ],
       "notebook/cell/title": [
         {
           "command": "gather.gatherCodeNativeNotebook",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellRunState == 3",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code",
           "group": "inline/cell@2"
         }
       ]
