@@ -33,10 +33,10 @@ export class GatherProvider implements IGatherProvider {
         if (vscCell.document) {
           code = vscCell.document.getText();
         } else {
-          code = (<any>vscCell).code as string;
+          code = (vscCell as any).code as string;
         }
         // find lines in code
-        const lineCount: number = code.length as number;
+        const lineCount = code.split('\n').length;
         this.linesSubmitted += lineCount;
         this.cellsSubmitted += 1;
       }
