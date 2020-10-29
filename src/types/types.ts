@@ -40,7 +40,7 @@ export enum Telemetry {
 }
 
 export type KernelStateEventArgs = {
-  notebookId: string;
+  resource: vscode.Uri;
   state: KernelState;
   cell?: vscode.NotebookCell;
 };

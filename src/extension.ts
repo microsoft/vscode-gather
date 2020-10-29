@@ -43,8 +43,8 @@ export async function activate() {
       });
 
       vscode.notebook.onDidCloseNotebookDocument((notebook) => {
-        if (gatherProviderMap.has(notebook.uri.fsPath)) {
-          gatherProviderMap.delete(notebook.uri.fsPath);
+        if (gatherProviderMap.has(notebook.uri.toString())) {
+          gatherProviderMap.delete(notebook.uri.toString());
         }
       });
 
@@ -58,9 +58,8 @@ export async function activate() {
       });
 
       const button = jupyter.exports.registerCellToolbarButton(
-        'GatherButton',
-        async (cell: vscode.NotebookCell, isInteractive: boolean, notebookId: string) => {
-          const provider = gatherProviderMap.get(notebookId);
+        async (cell: vscode.NotebookCell, isInteractive: boolean, resource: vscode.Uri) => {
+          const provider = gatherProviderMap.get(resource.toString());
           if (provider) {
             provider.gatherCode(cell, isInteractive);
           } else {
@@ -76,20 +75,20 @@ export async function activate() {
         if (nbEvent.state === KernelState.started) {
           let language = Constants.PYTHON_LANGUAGE;
           vscode.notebook.visibleNotebookEditors.forEach((ne) => {
-            if (ne.document.uri.fsPath === nbEvent.notebookId && ne.document.languages[0]) {
+            if (ne.document.uri.toString() === nbEvent.resource.toString() && ne.document.languages[0]) {
               language = ne.document.languages[0];
             }
           });
 
           let provider = new GatherProvider(language);
-          gatherProviderMap.set(nbEvent.notebookId, provider)
+          gatherProviderMap.set(nbEvent.resource.toString(), provider)
         } else if (nbEvent.state === KernelState.restarted) {
-          const provider = gatherProviderMap.get(nbEvent.notebookId);
+          const provider = gatherProviderMap.get(nbEvent.resource.toString());
           if (provider) {
             provider.resetLog();
           }
         } else if (nbEvent.state === KernelState.executed && nbEvent.cell) {
-          const provider = gatherProviderMap.get(nbEvent.notebookId);
+          const provider = gatherProviderMap.get(nbEvent.resource.toString());
           if (provider) {
             provider.logExecution(nbEvent.cell);
           }
