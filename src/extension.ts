@@ -25,7 +25,7 @@ export async function activate() {
       }
 
       vscode.commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: vscode.NotebookCell) => {
-        const id = cell.notebook.uri.fsPath;
+        const id = cell.notebook.uri.toString();
         const provider = gatherProviderMap.get(id);
 
         if (provider) {
@@ -39,6 +39,12 @@ export async function activate() {
           }
         } else {
           vscode.window.showInformationMessage(localize.Common.runCells());
+        }
+      });
+
+      vscode.notebook.onDidCloseNotebookDocument((notebook) => {
+        if (gatherProviderMap.has(notebook.uri.fsPath)) {
+          gatherProviderMap.delete(notebook.uri.fsPath);
         }
       });
 

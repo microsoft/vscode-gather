@@ -28,8 +28,15 @@ export class GatherProvider implements IGatherProvider {
 
   public async logExecution(vscCell: vscode.NotebookCell): Promise<void> {
     try {
-      if (vscCell && vscCell.document) {
-        const lineCount: number = vscCell.document.getText().length as number;
+      if (vscCell) {
+        let code = '';
+        if (vscCell.document) {
+          code = vscCell.document.getText();
+        } else {
+          code = (<any>vscCell).code as string;
+        }
+        // find lines in code
+        const lineCount: number = code.length as number;
         this.linesSubmitted += lineCount;
         this.cellsSubmitted += 1;
       }

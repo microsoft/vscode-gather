@@ -26,7 +26,9 @@
     "onLanguage:python",
     "onLanguage:jupyter",
     "onNotebook:jupyter-notebook",
-    "onCustomEditor:viewType"
+    "onCustomEditor:viewType",
+    "onCommand:jupyter.opennotebook",
+    "onCommand:jupyter.opennotebookInPreviewEditor"
   ],
   "main": "./out/extension.js",
   "contributes": {
