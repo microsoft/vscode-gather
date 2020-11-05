@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality to the Python Extension",
-  "version": "2020.9.0",
+  "version": "2020.11.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
@@ -112,7 +112,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
     "@jupyterlab/services": "^4.2.0",
-    "@msrvida/python-program-analysis": "^0.4.45",
+    "@msrvida/python-program-analysis": "^0.5.1",
     "@opentelemetry/api": "^0.11.0",
     "@opentelemetry/tracing": "^0.11.0",
     "@types/uuid": "^3.4.3",
