@@ -1,5 +1,7 @@
 import * as ppa from "@msrvida/python-program-analysis";
 import * as vscode from "vscode";
+import * as path from 'path';
+import * as fs from 'fs-extra';
 import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
 import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
@@ -45,10 +47,8 @@ export class GatherProvider implements IGatherProvider {
       if (vscCell.language === Constants.PYTHON_LANGUAGE) {
         const gatherCell = convertVscToGatherCell(vscCell);
 
-        if (gatherCell) {
-          if (this._executionSlicer) {
-            this._executionSlicer.logExecution(gatherCell);
-          }
+        if (gatherCell && this._executionSlicer) {
+          this._executionSlicer.logExecution(gatherCell);
         }
       }
 
@@ -173,9 +173,12 @@ export class GatherProvider implements IGatherProvider {
           }
   
           if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
-            ppa.addSpecFolder(additionalSpecPath);
+            const specsPaths = fs.readdirSync(additionalSpecPath);
+            let specs: string[] = [];
+            specsPaths.forEach(fileName => specs.push(fs.readFileSync(path.resolve(additionalSpecPath!, fileName)).toString()));
+            ppa.addSpecFolder(specs);
           } else {
-            console.error(`Gather: additional spec folder ${additionalSpecPath} but not found.`);
+            console.log(`Gather: additional spec folder ${additionalSpecPath} not found.`);
           }
   
           // Only continue to initialize gather if we were successful in finding SOME specs.
