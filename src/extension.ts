@@ -7,16 +7,13 @@ import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
 
 const registeredButtons: vscode.Disposable[] = [];
+const cellStatusBarItems = new Map<vscode.NotebookCell, vscode.NotebookCellStatusBarItem>();
+const gatherProviderMap = new Map<string, IGatherProvider>();
 
 export async function activate() {
   try {
     sendTelemetryEvent(Telemetry.GatherIsInstalled);
-    const cellStatusBarItems = new WeakMap<vscode.NotebookCell, vscode.NotebookCellStatusBarItem>();
-    const gatherProviderMap = new Map<string, IGatherProvider>();
-
-    const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(
-      Constants.jupyterExtension
-    );
+    const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(Constants.jupyterExtension);
 
     if (jupyter) {
       if (!jupyter.isActive) {
@@ -24,6 +21,7 @@ export async function activate() {
         await jupyter.exports.ready;
       }
 
+      // Register command to be executed by native notebooks.
       vscode.commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: vscode.NotebookCell) => {
         const id = cell.notebook.uri.toString();
         const provider = gatherProviderMap.get(id);
@@ -42,21 +40,25 @@ export async function activate() {
         }
       });
 
+      // Delete the gatherProvider when a notebook is closed.
       vscode.notebook.onDidCloseNotebookDocument((notebook) => {
         if (gatherProviderMap.has(notebook.uri.toString())) {
           gatherProviderMap.delete(notebook.uri.toString());
         }
       });
 
+      // Add a loading message to all cells' status bar. 
+      // It will be activated while gather is working.
       vscode.notebook.onDidOpenNotebookDocument((notebook) => {
         notebook.cells.forEach(cell => {
           const item = cellStatusBarItems.get(cell) ?? vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
           cellStatusBarItems.set(cell, item);
-          item.text = 'Gathering $(sync~spin)';
+          item.text = localize.Common.gathering();
           item.hide();
         });
       });
 
+      // Register the gather button to be shown on the Jupyter Extension's webviews.
       const button = jupyter.exports.registerCellToolbarButton(
         async (cell: vscode.NotebookCell, isInteractive: boolean, resource: vscode.Uri) => {
           const provider = gatherProviderMap.get(resource.toString());
@@ -71,6 +73,7 @@ export async function activate() {
         localize.Common.gatherTooltip());
       registeredButtons.push(button);
 
+      // Execute the gather events
       jupyter.exports.onKernelStateChange((nbEvent: KernelStateEventArgs) => {
         if (nbEvent.state === KernelState.started) {
           let language = Constants.PYTHON_LANGUAGE;
@@ -96,11 +99,13 @@ export async function activate() {
       });
     }
   } catch (e) {
-    vscode.window.showErrorMessage('Gather: Exception at Activate', e);
+    vscode.window.showErrorMessage(localize.Common.activateError(), e);
     sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'activate' });
   }
 }
 
 export async function deactivate() {
   registeredButtons.forEach((b) => b.dispose());
+  cellStatusBarItems.clear();
+  gatherProviderMap.clear();
 }

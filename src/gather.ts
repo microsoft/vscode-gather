@@ -32,14 +32,19 @@ export class GatherProvider implements IGatherProvider {
     try {
       if (vscCell) {
         let code = '';
-        if (vscCell.document) {
-          code = vscCell.document.getText();
-        } else {
-          code = (vscCell as any).code as string;
+        try {
+          if (vscCell.document) {
+            code = vscCell.document.getText();
+          } else {
+            code = (vscCell as any).code as string;
+          }
+
+          // find lines in code
+          const lineCount = code.split('\n').length;
+          this.linesSubmitted += lineCount;
+        } catch {
+          this.linesSubmitted = -1;
         }
-        // find lines in code
-        const lineCount = code.split('\n').length;
-        this.linesSubmitted += lineCount;
         this.cellsSubmitted += 1;
       }
       await this.initPromise;
@@ -57,7 +62,7 @@ export class GatherProvider implements IGatherProvider {
       // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
-      vscode.window.showErrorMessage("Gather: Error logging execution on cell:\n" + vscCell.document.getText(), e);
+      vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText(), e);
       throw e;
     }
   }
@@ -79,7 +84,7 @@ export class GatherProvider implements IGatherProvider {
       // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
-      vscode.window.showErrorMessage("Gather: Error resetting log", e);
+      vscode.window.showErrorMessage(localize.Common.resetLog(), e);
       throw e;
     }
   }
@@ -115,21 +120,24 @@ export class GatherProvider implements IGatherProvider {
   }
 
   private gatherCodeInternal(vscCell: vscode.NotebookCell): string {
+    const settings = vscode.workspace.getConfiguration();
+    const defaultCellMarker: string = settings ?
+      settings.get(Constants.defaultCellMarkerSetting) as string :
+      Constants.DefaultCodeCellMarker;
+    const newline = '\n';
+
     try {
       if (vscCell.language === Constants.PYTHON_LANGUAGE) {
         if (!this._executionSlicer) {
-          return "# %% [markdown]\n## Gather not available";
+          vscode.window.showErrorMessage(localize.Common.notAvailable());
+          return "";
         }
 
         const gatherCell = convertVscToGatherCell(vscCell);
         if (!gatherCell) {
+          vscode.window.showErrorMessage(localize.Common.errorTranslatingCell());
           return "";
         }
-
-        const settings = vscode.workspace.getConfiguration();
-        const defaultCellMarker: string = settings ?
-          settings.get(Constants.defaultCellMarkerSetting) as string :
-          Constants.DefaultCodeCellMarker;
 
         // Call internal slice method
         const slice = this._executionSlicer.sliceLatestExecution(gatherCell.persistentId);
@@ -144,7 +152,7 @@ export class GatherProvider implements IGatherProvider {
       //   C# work
       // }
 
-      return '# %% [markdown]\n## Gather not available in ' + vscCell.language;
+      return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
     } catch (e) {
       // Cannot read property 'cellSlices' of undefined
       if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {
@@ -153,11 +161,6 @@ export class GatherProvider implements IGatherProvider {
       }
       vscode.window.showErrorMessage(localize.Common.gatherError(), e);
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
-      const newline = '\n';
-      const settings = vscode.workspace.getConfiguration();
-      const defaultCellMarker = settings ? 
-        settings.get(Constants.defaultCellMarkerSetting) as string :
-        Constants.DefaultCodeCellMarker;
       return defaultCellMarker + newline + localize.Common.gatherError() + newline + (e as string);
     }
   }
@@ -178,7 +181,7 @@ export class GatherProvider implements IGatherProvider {
             specsPaths.forEach(fileName => specs.push(fs.readFileSync(path.resolve(additionalSpecPath!, fileName)).toString()));
             ppa.addSpecFolder(specs);
           } else {
-            console.log(`Gather: additional spec folder ${additionalSpecPath} not found.`);
+            console.log(localize.Common.specFolderNotfound() + '\n' + additionalSpecPath)
           }
   
           // Only continue to initialize gather if we were successful in finding SOME specs.
@@ -186,11 +189,11 @@ export class GatherProvider implements IGatherProvider {
             this.dataflowAnalyzer = new ppa.DataflowAnalyzer();
             this._executionSlicer = new ppa.ExecutionLogSlicer(this.dataflowAnalyzer);
           } else {
-            console.error("Gather couldn't find any package specs.");
+            console.error(localize.Common.couldNotFindSpecs());
           }
         }
       } catch (ex) {
-        console.error(`Gathering tools could't be activated. ${util.format(ex)}`);
+        console.error(localize.Common.couldNotActivateTools, util.format(ex));
         throw ex;
       }
     }

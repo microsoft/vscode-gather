@@ -58,10 +58,14 @@ export function concat(existingText: string, newText: ppa.CellSlice): string {
  */
 export function convertVscToGatherCell(cell: vscode.NotebookCell): ppa.Cell | undefined {
   let code = '';
-  if (cell.document) {
-    code = cell.document.getText();
-  } else {
-    code = (<any>cell).code as string;
+  try {
+    if (cell.document) {
+      code = cell.document.getText();
+    } else {
+      code = (cell as any).code as string;
+    }
+  } catch {
+    return undefined;
   }
   // This should always be true since we only want to log code cells. Putting this here so types match for outputs property
   const result: ppa.Cell = {
