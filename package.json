@@ -1,34 +1,89 @@
 {
   "name": "gather",
   "displayName": "Gather",
-  "description": "Adds gather functionality to the Python Extension",
-  "version": "2020.7.1",
+  "description": "Adds gather functionality in the Python language to the Jupyter Extension",
+  "version": "2020.11.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
   },
-  "homepage": "https://github.com/Microsoft/vscode-python",
+  "homepage": "https://github.com/microsoft/vscode-jupyter",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/vscode-gather"
   },
   "bugs": {
-    "url": "https://github.com/Microsoft/vscode-python/issues"
+    "url": "https://github.com/microsoft/vscode-jupyter/issues"
   },
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.48.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Other",
+    "Extension Packs",
+    "Data Science",
+    "Machine Learning",
+    "Notebooks"
   ],
   "icon": "icon.png",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:jupyter",
+    "onNotebook:jupyter-notebook",
+    "onCustomEditor:viewType",
+    "onCommand:jupyter.opennotebook",
+    "onCommand:jupyter.opennotebookInPreviewEditor"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [
+      {
+        "command": "gather.gatherCodeNativeNotebook",
+        "title": "Gather code",
+        "icon": "$(group-by-ref-type)",
+        "category": "Gather"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "gather.gatherCodeNativeNotebook",
+          "title": "Gather code",
+          "when": "false",
+          "category": "Gather"
+        }
+      ],
+      "notebook/cell/title": [
+        {
+          "command": "gather.gatherCodeNativeNotebook",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code",
+          "group": "inline/cell@2",
+          "category": "Gather"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Gather",
+      "properties": {
+        "gather.gatherToScript": {
+          "type": "boolean",
+          "default": false,
+          "description": "Gather code to a python script rather than a notebook.",
+          "scope": "resource"
+        },
+        "gather.gatherSpecPath": {
+          "type": "string",
+          "default": "",
+          "description": "This setting specifies a folder that contains additional or replacement spec files used for analysis.",
+          "scope": "resource"
+        }
+      }
+    }
   },
   "extensionDependencies": [
-    "ms-python.python"
+    "ms-toolsai.jupyter"
   ],
   "scripts": {
     "prepublish": "webpack --mode production",
@@ -36,38 +91,46 @@
     "webpack-watch": "webpack --mode development --watch",
     "lint": "eslint src --ext ts",
     "compile": "tsc -watch -p ./",
-    "vsix": "vsce package",
+    "vsix": "npm run webpack && vsce package",
     "npm-auth": "vsts-npm-auth -config .npmrc",
     "test": "mocha --config ./src/test/.mocha.config.json"
   },
   "devDependencies": {
+    "@types/fs-extra": "^5.0.1",
+    "@types/copy-webpack-plugin": "^4.4.2",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
+    "@types/stack-trace": "0.0.29",
     "@types/vscode": "^1.47.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
     "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
     "eslint": "^7.2.0",
-    "filemanager-webpack-plugin-fixed": "^2.0.9",
     "glob": "^7.1.6",
     "mocha": "^7.2.0",
-    "terser-webpack-plugin": "^3.0.6",
     "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
     "typemoq": "^2.1.0",
     "typescript": "^4.0.2",
     "vscode-test": "^1.3.0",
     "webpack": "^5.0.0-alpha.13",
-    "webpack-cli": "^3.3.12",
-    "webpack-obfuscator": "^1.6.0"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
-    "@msrvida/python-program-analysis": "^0.4.42",
+    "@jupyterlab/services": "^4.2.0",
+    "@msrvida/python-program-analysis": "^0.5.1",
+    "@opentelemetry/api": "^0.11.0",
+    "@opentelemetry/tracing": "^0.11.0",
     "@types/uuid": "^3.4.3",
+    "fs-extra": "^4.0.3",
+    "npm": "^6.14.8",
     "path": "^0.12.7",
+    "stack-trace": "0.0.10",
     "uuid": "^3.3.2",
+    "vscode-extension-telemetry": "0.1.4",
     "webpack-bundle-analyzer": "^3.8.0"
   }
 }

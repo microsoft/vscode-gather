@@ -1,0 +1,52 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "vscode-gather"
+        },
+        {
+            "name": "vscode-jupyter",
+            "path": "../vscode-jupyter"
+        }
+    ],
+    "settings": {
+        "typescript.tsdk": "./node_modules/typescript/lib",
+        "search.exclude": {
+            "**/node_modules/**": true,
+            "**/.vscode test/insider/**": true,
+            "**/.vscode test/stable/**": true,
+            "**/.vscode-test/insider/**": true,
+            "**/.vscode-test/stable/**": true,
+            "**/out/**": true
+        }
+    },
+    "launch": {
+        "configurations": [
+            // This configuration allows one to debug multiple extensions at a time.
+            // The assumption here is that vscode-notebook-renderers is in the same folder as the python extension.
+            // User is expected to start the compile tasks for both extensions before using this launch config.
+            {
+                "type": "extensionHost",
+                "request": "launch",
+                "name": "Jupyter + Gather",
+                "args": [
+                    "--enable-proposed-api",
+                    "--extensionDevelopmentPath=${workspaceFolder:vscode-jupyter}",
+                    "--extensionDevelopmentPath=${workspaceFolder:vscode-gather}"
+                ],
+                "stopOnEntry": false,
+                "sourceMaps": true,
+                "outFiles": [
+                    "${workspaceFolder:vscode-jupyter}/out/**/*.js",
+                    "!${workspaceFolder:vscode-jupyter}/**/node_modules**/*",
+                    "${workspaceFolder:vscode-gather}/out/**/*.js",
+                    "!${workspaceFolder:vscode-gather}/**/node_modules**/*"
+                ],
+                "skipFiles": [
+                    "<node_internals>/**"
+                ]
+            }
+        ],
+        "compounds": []
+    }
+}

@@ -10,7 +10,9 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
     },
@@ -38,7 +40,10 @@
         "!${workspaceFolder}/**/node_modules**/*"
       ],
       "preLaunchTask": "${defaultBuildTask}",
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "VSC_GATHER_UNIT_TEST": "1"
+      }
     }
   ]
 }

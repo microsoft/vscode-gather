@@ -1,22 +1,22 @@
 import * as ppa from "@msrvida/python-program-analysis";
-import * as path from "path";
-import * as uuid from "uuid/v4";
-import { window, workspace } from "vscode";
-import {
-  Constants,
-  IGatherProvider,
-  CellState,
-  ICell as IVscCell,
-} from "./types";
-import { pathExists } from "./helpers";
+import * as vscode from "vscode";
+import * as path from 'path';
+import * as fs from 'fs-extra';
+import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
+import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
+import * as localize from './localize';
+import { sendTelemetryEvent } from "./telemetry";
 
 export class GatherProvider implements IGatherProvider {
   private _executionSlicer: ppa.ExecutionLogSlicer<ppa.Cell> | undefined;
   private dataflowAnalyzer: ppa.DataflowAnalyzer | undefined;
   private initPromise: Promise<void>;
+  private gatherTimer: StopWatch | undefined;
+  private linesSubmitted: number = 0;
+  private cellsSubmitted: number = 0;
 
-  constructor(private readonly extensionPath: string) {
+  constructor(private readonly language: string) {
     this.initPromise = this.init();
   }
 
@@ -28,35 +28,63 @@ export class GatherProvider implements IGatherProvider {
     }
   }
 
-  public async logExecution(vscCell: IVscCell): Promise<void> {
+  public async logExecution(vscCell: vscode.NotebookCell): Promise<void> {
     try {
+      if (vscCell) {
+        let code = '';
+        try {
+          if (vscCell.document) {
+            code = vscCell.document.getText();
+          } else {
+            code = (vscCell as any).code as string;
+          }
+
+          // find lines in code
+          const lineCount = code.split('\n').length;
+          this.linesSubmitted += lineCount;
+        } catch {
+          this.linesSubmitted = -1;
+        }
+        this.cellsSubmitted += 1;
+      }
       await this.initPromise;
 
-      const gatherCell = convertVscToGatherCell(vscCell);
+      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+        const gatherCell = convertVscToGatherCell(vscCell);
 
-      if (gatherCell) {
-        if (this._executionSlicer) {
+        if (gatherCell && this._executionSlicer) {
           this._executionSlicer.logExecution(gatherCell);
         }
       }
+
+      // if (vscCell.language === 'C#') {
+      //   C# work
+      // }
     } catch (e) {
-      window.showErrorMessage(
-        "Gather: Error logging execution on cell:\n" + vscCell.data.source[0],
-        e
-      );
+      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
+      vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText(), e);
       throw e;
     }
   }
 
   public async resetLog(): Promise<void> {
     try {
+      this.linesSubmitted = 0;
+      this.cellsSubmitted = 0;
       await this.initPromise;
 
-      if (this._executionSlicer) {
-        this._executionSlicer.reset();
+      if (this.language === Constants.PYTHON_LANGUAGE) {
+        if (this._executionSlicer) {
+          this._executionSlicer.reset();
+        }
       }
+      
+      // if (this.language === C#) {
+      //   C# work
+      // }
     } catch (e) {
-      window.showErrorMessage("Gather: Error resetting log", e);
+      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
+      vscode.window.showErrorMessage(localize.Common.resetLog(), e);
       throw e;
     }
   }
@@ -64,116 +92,168 @@ export class GatherProvider implements IGatherProvider {
   /**
    * For a given code cell, returns a string representing a program containing all the code it depends on.
    */
-  public gatherCode(vscCell: IVscCell): string {
-    if (!this._executionSlicer) {
-      return "# %% [markdown]\n## Gather not available";
+  public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false): Promise<void> {
+      this.gatherTimer = new StopWatch();
+      const gatheredCode = this.gatherCodeInternal(vscCell);
+      if (gatheredCode.length === 0) {
+        return;
+      }
+
+      const settings = vscode.workspace.getConfiguration();
+      const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
+
+      if (gatherToScript) {
+        const filename = vscCell.notebook?.fileName || '';
+        await this.showFile(gatheredCode, filename);
+        sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
+      } else {
+        await this.showNotebook(gatheredCode);
+        sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
+      }
+
+      sendTelemetryEvent(Telemetry.GatherStats, undefined, {
+        linesSubmitted: this.linesSubmitted,
+        cellsSubmitted: this.cellsSubmitted,
+        linesGathered: splitLines(gatheredCode.trim()).length,
+        cellsGathered: countCells(splitLines(gatheredCode.trim()))
+      });
+  }
+
+  private gatherCodeInternal(vscCell: vscode.NotebookCell): string {
+    const settings = vscode.workspace.getConfiguration();
+    const defaultCellMarker: string = settings ?
+      settings.get(Constants.defaultCellMarkerSetting) as string :
+      Constants.DefaultCodeCellMarker;
+    const newline = '\n';
+
+    try {
+      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+        if (!this._executionSlicer) {
+          vscode.window.showErrorMessage(localize.Common.notAvailable());
+          return "";
+        }
+
+        const gatherCell = convertVscToGatherCell(vscCell);
+        if (!gatherCell) {
+          vscode.window.showErrorMessage(localize.Common.errorTranslatingCell());
+          return "";
+        }
+
+        // Call internal slice method
+        const slice = this._executionSlicer.sliceLatestExecution(gatherCell.persistentId);
+
+        return slice.cellSlices
+          .reduce(concat, "")
+          .replace(/#%%/g, defaultCellMarker)
+          .trim();
+      }
+
+      // if (vscCell.language === 'C#') {
+      //   C# work
+      // }
+
+      return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
+    } catch (e) {
+      // Cannot read property 'cellSlices' of undefined
+      if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {
+        vscode.window.showInformationMessage(localize.Common.runCells());
+        return "";
+      }
+      vscode.window.showErrorMessage(localize.Common.gatherError(), e);
+      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
+      return defaultCellMarker + newline + localize.Common.gatherError() + newline + (e as string);
     }
-
-    const gatherCell = convertVscToGatherCell(vscCell);
-    if (!gatherCell) {
-      return "";
-    }
-
-    const settings = workspace.getConfiguration();
-    let defaultCellMarker: string;
-    // Get the default cell marker as we need to replace #%% with it.
-    if (settings) {
-      defaultCellMarker = settings.get(
-        "python.dataScience.defaultCellMarker"
-      ) as string;
-    } else {
-      defaultCellMarker = Constants.DefaultCodeCellMarker;
-    }
-
-    // Call internal slice method
-    const slice = this._executionSlicer.sliceLatestExecution(
-      gatherCell.persistentId
-    );
-
-    return slice.cellSlices
-      .reduce(concat, "")
-      .replace(/#%%/g, defaultCellMarker)
-      .trim();
   }
 
   private async init(): Promise<void> {
-    try {
-      if (ppa) {
-        // If the __builtins__ specs are not available for gather, then no specs have been found. Look in a specific location relative
-        // to the extension.
-        if (!ppa.getSpecs()) {
-          console.error("not found");
-          const defaultSpecFolder = path.join(
-            this.extensionPath,
-            "out",
-            "client",
-            "gatherSpecs"
-          );
-          if (await pathExists(defaultSpecFolder)) {
-            ppa.setSpecFolder(defaultSpecFolder);
+    if (this.language === Constants.PYTHON_LANGUAGE) {
+      try {
+        if (ppa) {
+          const settings = vscode.workspace.getConfiguration();
+          let additionalSpecPath: string | undefined;
+          if (settings) {
+            additionalSpecPath = settings.get(Constants.gatherSpecPathSetting);
+          }
+  
+          if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
+            const specsPaths = fs.readdirSync(additionalSpecPath);
+            let specs: string[] = [];
+            specsPaths.forEach(fileName => specs.push(fs.readFileSync(path.resolve(additionalSpecPath!, fileName)).toString()));
+            ppa.addSpecFolder(specs);
+          } else {
+            console.log(localize.Common.specFolderNotfound() + '\n' + additionalSpecPath)
+          }
+  
+          // Only continue to initialize gather if we were successful in finding SOME specs.
+          if (ppa.getSpecs()) {
+            this.dataflowAnalyzer = new ppa.DataflowAnalyzer();
+            this._executionSlicer = new ppa.ExecutionLogSlicer(this.dataflowAnalyzer);
+          } else {
+            console.error(localize.Common.couldNotFindSpecs());
           }
         }
-
-        const settings = workspace.getConfiguration();
-        let additionalSpecPath: string | undefined;
-        if (settings) {
-          // Check to see if any additional specs can be found.
-          additionalSpecPath = settings.get(
-            "python.dataScience.gatherSpecPath"
-          );
-        }
-
-        if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
-          ppa.addSpecFolder(additionalSpecPath);
-        } else {
-          console.error(
-            `Gather: additional spec folder ${additionalSpecPath} but not found.`
-          );
-        }
-
-        // Only continue to initialize gather if we were successful in finding SOME specs.
-        if (ppa.getSpecs()) {
-          this.dataflowAnalyzer = new ppa.DataflowAnalyzer();
-          this._executionSlicer = new ppa.ExecutionLogSlicer(
-            this.dataflowAnalyzer
-          );
-        } else {
-          console.error("Gather couldn't find any package specs.");
-        }
+      } catch (ex) {
+        console.error(localize.Common.couldNotActivateTools, util.format(ex));
+        throw ex;
       }
-    } catch (ex) {
-      console.error(`Gathering tools could't be activated. ${util.format(ex)}`);
-      throw ex;
     }
+
+    // if (this.language === 'C#') {
+    //   C# work
+    // }
   }
-}
 
-/**
- * Accumulator to concatenate cell slices for a sliced program, preserving cell structures.
- */
-function concat(existingText: string, newText: ppa.CellSlice): string {
-  // Include our cell marker so that cell slices are preserved
-  return `${existingText}#%%\n${newText.textSliceLines}\n`;
-}
+  private async showFile(gatheredCode: string, filename: string) {
+    const settings = vscode.workspace.getConfiguration();
+    const defaultCellMarker: string = settings ?
+      settings.get(Constants.defaultCellMarkerSetting) as string :
+      Constants.DefaultCodeCellMarker;
 
-/**
- * This is called to convert VS Code ICells to Gather ICells for logging.
- * @param cell A cell object conforming to the VS Code cell interface
- */
-function convertVscToGatherCell(cell: IVscCell): ppa.Cell | undefined {
-  // This should always be true since we only want to log code cells. Putting this here so types match for outputs property
-  if (cell.data.cell_type === "code") {
-    const result: ppa.Cell = {
-      // tslint:disable-next-line no-unnecessary-local-variable
-      text: cell.data.source,
+    if (gatheredCode) {
+      // Remove all cell definitions and newlines
+      const re = new RegExp(`^(${defaultCellMarker}.*|\\s*)\n`, 'gm');
+      gatheredCode = gatheredCode.replace(re, '');
+    }
 
-      executionCount: cell.data.execution_count,
-      executionEventId: uuid(),
+    const annotatedScript = vscode.env?.uiKind === vscode.UIKind?.Web
+      ? `${localize.Common.gatheredScriptDescriptionWithoutSurvey()}${defaultCellMarker}\n${gatheredCode}`
+      : `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
 
-      persistentId: cell.id,
-      hasError: cell.state === CellState.error,
-      // tslint:disable-next-line: no-any
-    } as any;
-    return result;
+    // Don't want to open the gathered code on top of the interactive window
+    let viewColumn: vscode.ViewColumn | undefined;
+    const fileNameMatch = vscode.window.visibleTextEditors.filter((textEditor) =>
+      arePathsSame(textEditor.document.fileName, filename)
+    );
+    const definedVisibleEditors = vscode.window.visibleTextEditors.filter(
+        (textEditor) => textEditor.viewColumn !== undefined
+    );
+    if (vscode.window.visibleTextEditors.length > 0 && fileNameMatch.length > 0) {
+        // Original file is visible
+        viewColumn = fileNameMatch[0].viewColumn;
+    } else if (vscode.window.visibleTextEditors.length > 0 && definedVisibleEditors.length > 0) {
+        // There is a visible text editor, just not the original file. Make sure viewColumn isn't undefined
+        viewColumn = definedVisibleEditors[0].viewColumn;
+    } else {
+        // Only one panel open and interactive window is occupying it, or original file is open but hidden
+        viewColumn = vscode.ViewColumn.Beside;
+    }
+
+    const textDoc = await vscode.workspace.openTextDocument({ language: Constants.PYTHON_LANGUAGE, content: annotatedScript });
+    await vscode.window.showTextDocument(textDoc, viewColumn, true);
+  }
+
+  private async showNotebook(gatheredCode: string) {
+    let cells: SimpleCell[] = [
+      {
+        source: vscode.env.uiKind === vscode.UIKind?.Web
+          ? [localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()]
+          : [localize.Common.gatheredNotebookDescriptionInMarkdown()],
+        type: 'markdown'
+      }
+    ];
+    cells = cells.concat(generateCellsFromString(gatheredCode));
+    const notebook = createNotebookContent(cells);
+
+    await vscode.commands.executeCommand(Constants.openNotebookCommand, undefined, notebook);
   }
 }
