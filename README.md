@@ -29,7 +29,7 @@ Gather uses a set of files called "specs" that are used to identify whether each
 - sklearn
 - a set of built-in Python functions/keywords
 
-It is possible to add packages or api's to the supported list on your local installation. If you are interested in doing this for your own private work, or would like to contribute to the community to support other popular Python packages, please [let us know](https://github.com/microsoft/vscode-jupyter)!
+It is possible to add packages or APIs to the supported list on your local installation. If you are interested in doing this for your own private work, or would like to contribute to the community to support other popular Python packages, please [let us know](https://github.com/microsoft/vscode-jupyter)!
 
 ## Questions and issues
 
