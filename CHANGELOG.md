@@ -2,6 +2,16 @@
 
 All notable changes to the "gather-for-the-python-extension" extension will be documented in this file.
 
+## 2020.11.0 (November 11, 2020)
+- Added support for the Jupyter Extension
+- Added support native notebooks
+- Update packages
+- Removed obfuscation
+- Added telemetry
+- Added localization
+- Handle opening of gathered files and notebooks
+- Handle gather objects per kernel
+
 ## 2020.7.2 (August 17, 2020)
 - Bug Fixes
 
