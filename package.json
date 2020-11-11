@@ -7,6 +7,7 @@
   "author": {
     "name": "Microsoft Corporation"
   },
+  "license": "LICENSE",
   "homepage": "https://github.com/microsoft/vscode-jupyter",
   "repository": {
     "type": "git",
