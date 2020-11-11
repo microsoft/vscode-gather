@@ -89,15 +89,15 @@ export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extend
       if (!isTestExecution() && telemetryReporter) {
           return telemetryReporter;
       }
-      const extensionId = Constants.PythonExtension;
-      // tslint:disable-next-line:no-require-imports
-      const extensions = (require('vscode') as typeof import('vscode')).extensions;
-      const extension = extensions.getExtension(extensionId)!;
-      const extensionVersion = extension.packageJSON.version;
-  
-      // tslint:disable-next-line:no-require-imports
-      const reporter = require('vscode-extension-telemetry').default as typeof TelemetryReporter;
-      return (telemetryReporter = new reporter(extensionId, extensionVersion, AppinsightsKey, true));
+    const extensionId = Constants.GatherExtension;
+    // tslint:disable-next-line:no-require-imports
+    const extensions = (require('vscode') as typeof import('vscode')).extensions;
+    const extension = extensions.getExtension(extensionId)!;
+    const extensionVersion = extension.packageJSON.version;
+
+    // tslint:disable-next-line:no-require-imports
+    const reporter = require('vscode-extension-telemetry').default as typeof TelemetryReporter;
+    return (telemetryReporter = new reporter(extensionId, extensionVersion, AppinsightsKey, true));
   }
   
   function isTestExecution(): boolean {
