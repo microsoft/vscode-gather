@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "gather-for-the-python-extension" extension will be documented in this file.
+All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
 ## 2020.11.0 (November 11, 2020)
 - Added support for the Jupyter Extension
