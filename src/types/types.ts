@@ -4,7 +4,7 @@ import * as path from 'path';
 export namespace Constants {
   const folderName = path.basename(__dirname);
   export const EXTENSION_ROOT_DIR = folderName === 'client' ? path.join(__dirname, '..', '..') : path.join(__dirname, '..', '..', '..', '..');
-  export const PythonExtension = 'ms-python.python';
+  export const GatherExtension = 'ms-python.gather';
   export const DefaultCodeCellMarker = "# %%";
   export const jupyterExtension = 'ms-toolsai.jupyter';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
