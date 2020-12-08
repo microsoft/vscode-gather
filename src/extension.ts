@@ -36,7 +36,7 @@ export async function activate() {
             provider.gatherCode(cell, false);
           }
         } else {
-          vscode.window.showInformationMessage(localize.Common.runCells());
+          vscode.window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
         }
       });
 
@@ -65,7 +65,7 @@ export async function activate() {
           if (provider) {
             provider.gatherCode(cell, isInteractive);
           } else {
-            vscode.window.showInformationMessage(localize.Common.runCells());
+            vscode.window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
           }
         },
         'gather',

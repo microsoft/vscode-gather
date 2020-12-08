@@ -2,6 +2,9 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2020.12.0 (December 9, 2020)
+- Updated error messages
+
 ## 2020.11.0 (November 11, 2020)
 - Added support for the Jupyter Extension
 - Added support native notebooks
