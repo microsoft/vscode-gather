@@ -32,9 +32,11 @@
     "onLanguage:python",
     "onLanguage:jupyter",
     "onNotebook:jupyter-notebook",
-    "onCustomEditor:viewType",
+    "onCustomEditor:jupyter.notebook.ipynb",
     "onCommand:jupyter.opennotebook",
-    "onCommand:jupyter.opennotebookInPreviewEditor"
+    "onCommand:jupyter.opennotebookInPreviewEditor",
+    "onCommand:jupyter.createnewnotebook",
+    "onCommand:jupyter.createnewinteractive"
   ],
   "main": "./out/extension.js",
   "contributes": {
