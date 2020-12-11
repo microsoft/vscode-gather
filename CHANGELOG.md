@@ -2,6 +2,10 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2020.12.1 (December 10, 2020)
+- Activate extension when user creates a new empty notebook or interactive window.
+- Fix activation event for custom editor
+
 ## 2020.12.0 (December 9, 2020)
 - Updated error messages
 
