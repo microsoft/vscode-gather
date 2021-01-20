@@ -2,6 +2,9 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.1.0 (January 20, 2021)
+- Update the gather icon in native notebooks
+
 ## 2020.12.1 (December 10, 2020)
 - Activate extension when user creates a new empty notebook or interactive window.
 - Fix activation event for custom editor
