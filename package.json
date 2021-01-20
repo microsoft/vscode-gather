@@ -44,7 +44,7 @@
       {
         "command": "gather.gatherCodeNativeNotebook",
         "title": "Gather code",
-        "icon": "$(group-by-ref-type)",
+        "icon": "$(gather)",
         "category": "Gather"
       }
     ],
