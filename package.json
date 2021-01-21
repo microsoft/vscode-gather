@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality in the Python language to the Jupyter Extension",
-  "version": "2020.12.1",
+  "version": "2021.1.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
