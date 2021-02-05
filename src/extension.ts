@@ -101,6 +101,7 @@ export async function activate() {
   } catch (e) {
     vscode.window.showErrorMessage(localize.Common.activateError(), e);
     sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'activate' });
+    console.error(e);
   }
 }
 
