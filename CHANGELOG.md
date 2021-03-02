@@ -2,6 +2,11 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.3.0 (March 2, 2021)
+- Update vscode types
+- Update vscode mock
+- Get the language used from the notebook metadata
+
 ## 2021.1.0 (January 20, 2021)
 - Update the gather icon in native notebooks
 

@@ -175,13 +175,13 @@ export class GatherProvider implements IGatherProvider {
             additionalSpecPath = settings.get(Constants.gatherSpecPathSetting);
           }
   
-          if (additionalSpecPath && (await pathExists(additionalSpecPath))) {
+          if (additionalSpecPath && additionalSpecPath.length > 0 && (await pathExists(additionalSpecPath))) {
             const specsPaths = fs.readdirSync(additionalSpecPath);
             let specs: string[] = [];
             specsPaths.forEach(fileName => specs.push(fs.readFileSync(path.resolve(additionalSpecPath!, fileName)).toString()));
             ppa.addSpecFolder(specs);
           } else {
-            console.log(localize.Common.specFolderNotfound() + '\n' + additionalSpecPath)
+            console.log(localize.Common.specFolderNotfound() + '\n' + additionalSpecPath);
           }
   
           // Only continue to initialize gather if we were successful in finding SOME specs.
