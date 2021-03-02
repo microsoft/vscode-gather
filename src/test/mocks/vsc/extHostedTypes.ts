@@ -2140,6 +2140,6 @@ export namespace vscMockExtHostedTypes {
     }
 
     export class QuickInputButtons {
-        static readonly Back: vscode.QuickInputButton = { iconPath: 'back' };
+        static readonly Back: vscode.QuickInputButton = { } as any;
     }
 }

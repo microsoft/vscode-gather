@@ -70,21 +70,24 @@ export async function activate() {
         },
         'gather',
         [vscode.NotebookCellRunState.Success],
-        localize.Common.gatherTooltip());
+        localize.Common.gatherTooltip()
+      );
       registeredButtons.push(button);
 
       // Execute the gather events
       jupyter.exports.onKernelStateChange((nbEvent: KernelStateEventArgs) => {
         if (nbEvent.state === KernelState.started) {
-          let language = Constants.PYTHON_LANGUAGE;
-          vscode.notebook.visibleNotebookEditors.forEach((ne) => {
-            if (ne.document.uri.toString() === nbEvent.resource.toString() && ne.document.languages[0]) {
-              language = ne.document.languages[0];
-            }
-          });
+          let language: string;
+
+          try {
+            language = findLanguageInNotebook(nbEvent);
+          } catch {
+            // Interactive Window case just assumes python
+            language = Constants.PYTHON_LANGUAGE;
+          }
 
           let provider = new GatherProvider(language);
-          gatherProviderMap.set(nbEvent.resource.toString(), provider)
+          gatherProviderMap.set(nbEvent.resource.toString(), provider);
         } else if (nbEvent.state === KernelState.restarted) {
           const provider = gatherProviderMap.get(nbEvent.resource.toString());
           if (provider) {
@@ -109,4 +112,32 @@ export async function deactivate() {
   registeredButtons.forEach((b) => b.dispose());
   cellStatusBarItems.clear();
   gatherProviderMap.clear();
+}
+
+function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
+  let language: string | undefined;
+
+  vscode.notebook.visibleNotebookEditors.forEach((ne) => {
+    if (ne.document.uri.toString() === nbEvent.resource.toString()) {
+      // try to get the language from the metadata
+      if (
+          ne.document.metadata.custom &&
+          ne.document.metadata.custom.metadata &&
+          ne.document.metadata.custom.metadata.language_info &&
+          ne.document.metadata.custom.metadata.language_info.name
+      ) {
+        language = ne.document.metadata.custom.metadata.language_info.name;
+        return;
+      } else {
+        // try to get the language from the first cell
+        language = ne.document.cells[0].language;
+        return;
+      }
+    }
+  });
+
+  if (language && language.length > 0) {
+    return language;
+  }
+  return Constants.PYTHON_LANGUAGE;
 }
