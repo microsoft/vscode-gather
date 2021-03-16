@@ -117,20 +117,20 @@ export async function deactivate() {
 function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
   let language: string | undefined;
 
-  vscode.notebook.visibleNotebookEditors.forEach((ne) => {
-    if (ne.document.uri.toString() === nbEvent.resource.toString()) {
+  vscode.notebook.notebookDocuments.forEach((doc) => {
+    if (doc.uri.toString() === nbEvent.resource.toString()) {
       // try to get the language from the metadata
       if (
-          ne.document.metadata.custom &&
-          ne.document.metadata.custom.metadata &&
-          ne.document.metadata.custom.metadata.language_info &&
-          ne.document.metadata.custom.metadata.language_info.name
+          doc.metadata.custom &&
+          doc.metadata.custom.metadata &&
+          doc.metadata.custom.metadata.language_info &&
+          doc.metadata.custom.metadata.language_info.name
       ) {
-        language = ne.document.metadata.custom.metadata.language_info.name;
+        language = doc.metadata.custom.metadata.language_info.name;
         return;
       } else {
         // try to get the language from the first cell
-        language = ne.document.cells[0].language;
+        language = doc.cells[0].document.languageId;
         return;
       }
     }

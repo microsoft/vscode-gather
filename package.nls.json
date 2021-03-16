@@ -1,5 +1,6 @@
 {
     "Gather.error": "Gather internal error",
+    "Gather.ppaError": "Could not process the cell",
     "Gather.tooltip": "Gather the code required to generate this cell into a new notebook",
     "Gather.runCells": "Please run cells before gathering.",
     "Gather.reopenNotebooks": "If you just installed the extension, please close and reopen your notebooks before gathering.",

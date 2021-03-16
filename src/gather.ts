@@ -49,13 +49,14 @@ export class GatherProvider implements IGatherProvider {
       }
       await this.initPromise;
 
-      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
-        const gatherCell = convertVscToGatherCell(vscCell);
+      // Assume Python until proposed api is out
+      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+      const gatherCell = convertVscToGatherCell(vscCell);
 
-        if (gatherCell && this._executionSlicer) {
-          this._executionSlicer.logExecution(gatherCell);
-        }
+      if (gatherCell && this._executionSlicer) {
+        this._executionSlicer.logExecution(gatherCell);
       }
+      // }
 
       // if (vscCell.language === 'C#') {
       //   C# work
@@ -96,6 +97,7 @@ export class GatherProvider implements IGatherProvider {
       this.gatherTimer = new StopWatch();
       const gatheredCode = this.gatherCodeInternal(vscCell);
       if (gatheredCode.length === 0) {
+        vscode.window.showErrorMessage(localize.Common.gatherError(), localize.Common.PPAError());
         return;
       }
 
@@ -127,7 +129,8 @@ export class GatherProvider implements IGatherProvider {
     const newline = '\n';
 
     try {
-      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+      // Assume Python until proposed api is out
+      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
         if (!this._executionSlicer) {
           vscode.window.showErrorMessage(localize.Common.notAvailable());
           return "";
@@ -146,13 +149,13 @@ export class GatherProvider implements IGatherProvider {
           .reduce(concat, "")
           .replace(/#%%/g, defaultCellMarker)
           .trim();
-      }
+      // }
 
       // if (vscCell.language === 'C#') {
       //   C# work
       // }
 
-      return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
+      // return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
     } catch (e) {
       // Cannot read property 'cellSlices' of undefined
       if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {

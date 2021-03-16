@@ -548,7 +548,11 @@ export namespace vscMockExtHostedTypes {
 
     export class WorkspaceEdit implements vscode.WorkspaceEdit {
 
-        replaceCells(
+        replaceNotebookMetadata(_uri: vscode.Uri, _value: vscode.NotebookDocumentMetadata): void {
+            // Noop
+        }
+
+        replaceNotebookCells(
             _uri: vscode.Uri,
             _start: number,
             _end: number,
@@ -558,16 +562,16 @@ export namespace vscMockExtHostedTypes {
             // Noop.
         }
 
-        replaceCellOutput(
+        replaceNotebookCellOutput(
             _uri: vscode.Uri,
             _index: number,
-            _outputs: vscode.CellOutput[],
+            _outputs: vscode.NotebookCellOutput[],
             _metadata?: vscode.WorkspaceEditEntryMetadata
         ): void {
             // Noop.
         }
 
-        replaceCellMetadata(
+        replaceNotebookCellMetadata(
             _uri: vscode.Uri,
             _index: number,
             _cellMetadata: vscode.NotebookCellMetadata,
@@ -575,6 +579,19 @@ export namespace vscMockExtHostedTypes {
         ): void {
             // Noop.
         }
+
+        appendNotebookCellOutput(_uri: vscode.Uri, _index: number, _outputs: vscode.NotebookCellOutput[], _metadata?: vscode.WorkspaceEditEntryMetadata): void {
+            // Noop
+        }
+
+		replaceNotebookCellOutputItems(_uri: vscode.Uri, _index: number, _outputId: string, _items: vscode.NotebookCellOutputItem[], _metadata?: vscode.WorkspaceEditEntryMetadata): void {
+            // Noop
+        }
+
+		appendNotebookCellOutputItems(_uri: vscode.Uri, _index: number, _outputId: string, _items: vscode.NotebookCellOutputItem[], _metadata?: vscode.WorkspaceEditEntryMetadata): void {
+            //  Noop
+        }
+
         private _seqPool: number = 0;
 
         private _resourceEdits: { seq: number; from: vscUri.URI; to: vscUri.URI }[] = [];

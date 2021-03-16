@@ -74,7 +74,7 @@ export function convertVscToGatherCell(cell: vscode.NotebookCell): ppa.Cell | un
     executionCount: cell.metadata.executionOrder,
     executionEventId: uuid(),
 
-    persistentId: cell.uri.fragment,
+    persistentId: cell.document.uri.fragment,
     hasError: (cell.metadata.runState && cell.metadata.runState === vscode.NotebookCellRunState.Error),
     // tslint:disable-next-line: no-any
   } as any;

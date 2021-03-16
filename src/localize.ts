@@ -4,6 +4,7 @@ import { Constants } from './types/types';
 
 export namespace Common {
     export const gatherError = localize('Gather.error', 'Gather internal error');
+    export const PPAError = localize('Gather.ppaError', 'Could not process the cell');
     export const gatherTooltip = localize('Gather.tooltip', 'Gather the code required to generate this cell into a new notebook');
     export const runCells = localize('Gather.runCells', 'Please run cells before gathering.');
     export const reopenNotebooks = localize('Gather.reopenNotebooks', 'If you just installed the extension, please close and reopen your notebooks before gathering.');
