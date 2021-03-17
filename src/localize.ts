@@ -31,7 +31,7 @@ export namespace Common {
     export const specFolderNotfound = localize('Gather.specFolderNotfound', 'Gather: additional spec folder not found.');
     export const couldNotFindSpecs = localize('Gather.couldNotFindSpecs', "Gather couldn't find any package specs.");
     export const couldNotActivateTools = localize('Gather.couldNotActivateTools', "Gathering tools couldn't be activated.");
-    export const gathering = localize('Gather.gathering', 'Gathering $(sync~spin)');
+    export const gathering = localize('Gather.gathering', 'Gathering');
     export const activateError = localize('Gather.activateError', 'Gather: Exception at Activate\nPlease reload VS Code');
 }
 

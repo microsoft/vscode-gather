@@ -7,7 +7,6 @@ import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
 
 const registeredButtons: vscode.Disposable[] = [];
-const cellStatusBarItems = new Map<vscode.NotebookCell, vscode.NotebookCellStatusBarItem>();
 const gatherProviderMap = new Map<string, IGatherProvider>();
 
 export async function activate() {
@@ -27,14 +26,7 @@ export async function activate() {
         const provider = gatherProviderMap.get(id);
 
         if (provider) {
-          const item = cellStatusBarItems.get(cell);
-          if (item) {
-            item.show();
-            await provider.gatherCode(cell, false);
-            item.hide();
-          } else {
             provider.gatherCode(cell, false);
-          }
         } else {
           vscode.window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
         }
@@ -45,17 +37,6 @@ export async function activate() {
         if (gatherProviderMap.has(notebook.uri.toString())) {
           gatherProviderMap.delete(notebook.uri.toString());
         }
-      });
-
-      // Add a loading message to all cells' status bar. 
-      // It will be activated while gather is working.
-      vscode.notebook.onDidOpenNotebookDocument((notebook) => {
-        notebook.cells.forEach(cell => {
-          const item = cellStatusBarItems.get(cell) ?? vscode.notebook.createCellStatusBarItem(cell, vscode.NotebookCellStatusBarAlignment.Right);
-          cellStatusBarItems.set(cell, item);
-          item.text = localize.Common.gathering();
-          item.hide();
-        });
       });
 
       // Register the gather button to be shown on the Jupyter Extension's webviews.
@@ -110,7 +91,6 @@ export async function activate() {
 
 export async function deactivate() {
   registeredButtons.forEach((b) => b.dispose());
-  cellStatusBarItems.clear();
   gatherProviderMap.clear();
 }
 
