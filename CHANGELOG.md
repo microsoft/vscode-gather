@@ -2,6 +2,11 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.3.1 (March 19, 2021)
+- Updated vscode types to 1.55
+- Remove cell status bar items to show progress and use a notification instead
+- Update error messages
+
 ## 2021.3.0 (March 2, 2021)
 - Update vscode types
 - Update vscode mock
@@ -11,7 +16,7 @@ All notable changes to the "gather-for-the-jupyter-extension" extension will be 
 - Update the gather icon in native notebooks
 
 ## 2020.12.1 (December 10, 2020)
-- Activate extension when user creates a new empty notebook or interactive window.
+- Activate extension when user creates a new empty notebook or interactive window
 - Fix activation event for custom editor
 
 ## 2020.12.0 (December 9, 2020)
