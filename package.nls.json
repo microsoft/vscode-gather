@@ -1,5 +1,6 @@
 {
     "Gather.error": "Gather internal error",
+    "Gather.ppaError": "Could not process the cell",
     "Gather.tooltip": "Gather the code required to generate this cell into a new notebook",
     "Gather.runCells": "Please run cells before gathering.",
     "Gather.reopenNotebooks": "If you just installed the extension, please close and reopen your notebooks before gathering.",
@@ -14,6 +15,6 @@
     "Gather.specFolderNotfound": "Gather: additional spec folder not found.",
     "Gather.couldNotFindSpecs": "Gather couldn't find any package specs.",
     "Gather.couldNotActivateTools": "Gathering tools couldn't be activated.",
-    "Gather.gathering": "Gathering $(sync~spin)",
+    "Gather.gathering": "Gathering",
     "Gather.activateError": "Gather: Exception at Activate\nPlease reload VS Code"
 }

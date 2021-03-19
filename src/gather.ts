@@ -49,20 +49,22 @@ export class GatherProvider implements IGatherProvider {
       }
       await this.initPromise;
 
-      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
-        const gatherCell = convertVscToGatherCell(vscCell);
+      // Assume Python until proposed api is out
+      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+      const gatherCell = convertVscToGatherCell(vscCell);
 
-        if (gatherCell && this._executionSlicer) {
-          this._executionSlicer.logExecution(gatherCell);
-        }
+      if (gatherCell && this._executionSlicer) {
+        this._executionSlicer.logExecution(gatherCell);
       }
+      // }
 
       // if (vscCell.language === 'C#') {
       //   C# work
       // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
-      vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText(), e);
+      vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText());
+      console.error(e);
       throw e;
     }
   }
@@ -84,7 +86,8 @@ export class GatherProvider implements IGatherProvider {
       // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
-      vscode.window.showErrorMessage(localize.Common.resetLog(), e);
+      vscode.window.showErrorMessage(localize.Common.resetLog());
+      console.error(e);
       throw e;
     }
   }
@@ -93,30 +96,35 @@ export class GatherProvider implements IGatherProvider {
    * For a given code cell, returns a string representing a program containing all the code it depends on.
    */
   public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false): Promise<void> {
-      this.gatherTimer = new StopWatch();
-      const gatheredCode = this.gatherCodeInternal(vscCell);
-      if (gatheredCode.length === 0) {
-        return;
+    vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: localize.Common.gathering() }, 
+      async () => {
+        this.gatherTimer = new StopWatch();
+        const gatheredCode = this.gatherCodeInternal(vscCell);
+        if (gatheredCode.length === 0) {
+          return;
+        }
+
+        const settings = vscode.workspace.getConfiguration();
+        const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
+
+        if (gatherToScript) {
+          const filename = vscCell.notebook?.fileName || '';
+          await this.showFile(gatheredCode, filename);
+          sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
+        } else {
+          await this.showNotebook(gatheredCode);
+          sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
+        }
+
+        sendTelemetryEvent(Telemetry.GatherStats, undefined, {
+          linesSubmitted: this.linesSubmitted,
+          cellsSubmitted: this.cellsSubmitted,
+          linesGathered: splitLines(gatheredCode.trim()).length,
+          cellsGathered: countCells(splitLines(gatheredCode.trim()))
+        });
       }
-
-      const settings = vscode.workspace.getConfiguration();
-      const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
-
-      if (gatherToScript) {
-        const filename = vscCell.notebook?.fileName || '';
-        await this.showFile(gatheredCode, filename);
-        sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
-      } else {
-        await this.showNotebook(gatheredCode);
-        sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
-      }
-
-      sendTelemetryEvent(Telemetry.GatherStats, undefined, {
-        linesSubmitted: this.linesSubmitted,
-        cellsSubmitted: this.cellsSubmitted,
-        linesGathered: splitLines(gatheredCode.trim()).length,
-        cellsGathered: countCells(splitLines(gatheredCode.trim()))
-      });
+    );      
   }
 
   private gatherCodeInternal(vscCell: vscode.NotebookCell): string {
@@ -127,7 +135,8 @@ export class GatherProvider implements IGatherProvider {
     const newline = '\n';
 
     try {
-      if (vscCell.language === Constants.PYTHON_LANGUAGE) {
+      // Assume Python until proposed api is out
+      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
         if (!this._executionSlicer) {
           vscode.window.showErrorMessage(localize.Common.notAvailable());
           return "";
@@ -141,25 +150,32 @@ export class GatherProvider implements IGatherProvider {
 
         // Call internal slice method
         const slice = this._executionSlicer.sliceLatestExecution(gatherCell.persistentId);
-
-        return slice.cellSlices
+        const PpaResult = slice.cellSlices
           .reduce(concat, "")
           .replace(/#%%/g, defaultCellMarker)
           .trim();
-      }
+
+        if (PpaResult.length === 0) {
+          vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
+          return "";
+        }
+
+        return PpaResult;
+      // }
 
       // if (vscCell.language === 'C#') {
       //   C# work
       // }
 
-      return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
+      // return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
     } catch (e) {
       // Cannot read property 'cellSlices' of undefined
       if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {
         vscode.window.showInformationMessage(localize.Common.runCells());
         return "";
       }
-      vscode.window.showErrorMessage(localize.Common.gatherError(), e);
+      vscode.window.showErrorMessage(localize.Common.gatherError());
+      console.error(e);
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
       return defaultCellMarker + newline + localize.Common.gatherError() + newline + (e as string);
     }
