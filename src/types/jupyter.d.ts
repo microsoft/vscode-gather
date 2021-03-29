@@ -1,6 +1,6 @@
 "use strict";
-import { Disposable, Event, NotebookCell, NotebookCellRunState } from "vscode";
-import { KernelStateEventArgs } from './types'
+import { Disposable, Event, NotebookCell } from "vscode";
+import { KernelStateEventArgs, NotebookCellRunState } from './types';
 
 export interface IJupyterExtensionApi {
     ready: Promise<void>;
