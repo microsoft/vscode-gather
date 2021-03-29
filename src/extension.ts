@@ -1,18 +1,28 @@
 "use strict";
-import * as vscode from "vscode";
-import { Constants, IGatherProvider, KernelState, KernelStateEventArgs, Telemetry } from "./types/types";
+import {
+  commands,
+  Disposable,
+  extensions,
+  notebook,
+  NotebookCell,
+  NotebookCellExecutionState,
+  NotebookCellExecutionStateChangeEvent,
+  Uri,
+  window
+} from "vscode";
+import { Constants, IGatherProvider, KernelState, KernelStateEventArgs, NotebookCellRunState, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
 import { IJupyterExtensionApi } from "./types/jupyter";
 import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
 
-const registeredButtons: vscode.Disposable[] = [];
+const registeredButtons: Disposable[] = [];
 const gatherProviderMap = new Map<string, IGatherProvider>();
 
 export async function activate() {
   try {
     sendTelemetryEvent(Telemetry.GatherIsInstalled);
-    const jupyter = vscode.extensions.getExtension<IJupyterExtensionApi>(Constants.jupyterExtension);
+    const jupyter = extensions.getExtension<IJupyterExtensionApi>(Constants.jupyterExtension);
 
     if (jupyter) {
       if (!jupyter.isActive) {
@@ -21,19 +31,19 @@ export async function activate() {
       }
 
       // Register command to be executed by native notebooks.
-      vscode.commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: vscode.NotebookCell) => {
+      commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: NotebookCell) => {
         const id = cell.notebook.uri.toString();
         const provider = gatherProviderMap.get(id);
 
         if (provider) {
             provider.gatherCode(cell, false);
         } else {
-          vscode.window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+          window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
         }
       });
 
       // Delete the gatherProvider when a notebook is closed.
-      vscode.notebook.onDidCloseNotebookDocument((notebook) => {
+      notebook.onDidCloseNotebookDocument((notebook) => {
         if (gatherProviderMap.has(notebook.uri.toString())) {
           gatherProviderMap.delete(notebook.uri.toString());
         }
@@ -41,19 +51,28 @@ export async function activate() {
 
       // Register the gather button to be shown on the Jupyter Extension's webviews.
       const button = jupyter.exports.registerCellToolbarButton(
-        async (cell: vscode.NotebookCell, isInteractive: boolean, resource: vscode.Uri) => {
+        async (cell: NotebookCell, isInteractive: boolean, resource: Uri) => {
           const provider = gatherProviderMap.get(resource.toString());
           if (provider) {
             provider.gatherCode(cell, isInteractive);
           } else {
-            vscode.window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+            window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
           }
         },
         'gather',
-        [vscode.NotebookCellRunState.Success],
+        [NotebookCellRunState.Success],
         localize.Common.gatherTooltip()
       );
       registeredButtons.push(button);
+
+      notebook.onDidChangeCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
+        if (e.executionState === NotebookCellExecutionState.Idle) {
+          const provider = gatherProviderMap.get(e.document.uri.toString());
+          if (provider) {
+            provider.logExecution(e.cell);
+          }
+        }
+      });
 
       // Execute the gather events
       jupyter.exports.onKernelStateChange((nbEvent: KernelStateEventArgs) => {
@@ -83,7 +102,7 @@ export async function activate() {
       });
     }
   } catch (e) {
-    vscode.window.showErrorMessage(localize.Common.activateError(), e);
+    window.showErrorMessage(localize.Common.activateError(), e);
     sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'activate' });
     console.error(e);
   }
@@ -97,7 +116,7 @@ export async function deactivate() {
 function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
   let language: string | undefined;
 
-  vscode.notebook.notebookDocuments.forEach((doc) => {
+  notebook.notebookDocuments.forEach((doc) => {
     if (doc.uri.toString() === nbEvent.resource.toString()) {
       // try to get the language from the metadata
       if (

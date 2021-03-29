@@ -2,6 +2,9 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.4.0 (April 1, 2021)
+- Updated vscode engine and proposed api
+
 ## 2021.3.1 (March 19, 2021)
 - Updated vscode types to 1.55
 - Remove cell status bar items to show progress and use a notification instead
