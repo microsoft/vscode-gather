@@ -46,6 +46,12 @@
         "title": "Gather code",
         "icon": "$(gather)",
         "category": "Gather"
+      },
+      {
+        "command": "gather.smartSelect",
+        "title": "Smart Select",
+        "icon": "$(edit)",
+        "category": "Gather"
       }
     ],
     "menus": {
@@ -55,12 +61,24 @@
           "title": "Gather code",
           "when": "false",
           "category": "Gather"
+        },
+        {
+          "command": "gather.smartSelect",
+          "title": "Smart Select",
+          "when": "false",
+          "category": "Gather"
         }
       ],
       "notebook/cell/title": [
         {
           "command": "gather.gatherCodeNativeNotebook",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellExecutionState == succeeded",
+          "group": "inline/cell@2",
+          "category": "Gather"
+        },
+        {
+          "command": "gather.smartSelect",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellExecutionState == succeeded",
           "group": "inline/cell@2",
           "category": "Gather"
         }

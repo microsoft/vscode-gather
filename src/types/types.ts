@@ -8,11 +8,14 @@ export namespace Constants {
   export const DefaultCodeCellMarker = "# %%";
   export const jupyterExtension = 'ms-toolsai.jupyter';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
+  export const smartSelectCommand = 'gather.smartSelect';
   export const gatherToScriptSetting = 'gather.gatherToScript';
   export const gatherSpecPathSetting = 'gather.gatherSpecPath';
   export const PYTHON_LANGUAGE = 'python';
   export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
   export const openNotebookCommand = 'jupyter.opennotebook';
+  export const hasCellsSelected = 'hasCellsSelected';
+  export const setContextCommand = 'setContext';
 }
 
 export enum Telemetry {
@@ -58,5 +61,6 @@ export interface SimpleCell {
 export interface IGatherProvider {
   logExecution(vscCell: vscode.NotebookCell): void;
   gatherCode(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void>;
+  smartSelect(vscCell: vscode.NotebookCell): Promise<void>;
   resetLog(): void;
 }

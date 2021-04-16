@@ -109,7 +109,7 @@ export class GatherProvider implements IGatherProvider {
         const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
 
         if (gatherToScript) {
-          const filename = vscCell.notebook?.fileName || '';
+          const filename = vscCell.notebook?.uri.toString() || '';
           await this.showFile(gatheredCode, filename);
           sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
         } else {
@@ -271,5 +271,46 @@ export class GatherProvider implements IGatherProvider {
     const notebook = createNotebookContent(cells);
 
     await vscode.commands.executeCommand(Constants.openNotebookCommand, undefined, notebook);
+  }
+
+  public async smartSelect(vscCell: vscode.NotebookCell): Promise<void> {
+    vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: localize.Common.smartSelecting() }, 
+      async () => {
+        try {
+          const gatheredCode = this.gatherCodeInternal(vscCell);
+          if (gatheredCode.length === 0) {
+            // TODO handle error
+            return;
+          }
+          let cells = generateCellsFromString(gatheredCode);
+
+          if (vscode.window.activeNotebookEditor) {
+            const ranges: vscode.NotebookRange[] = [];
+
+            // Map gathered cells to notebook cells
+            cells.forEach(gatheredCell => {
+              const match = vscode.window.activeNotebookEditor?.document.getCells().find(notebookCell => {
+                if (notebookCell.document.getText().includes(gatheredCell.source.join('\n'))) {
+                  return notebookCell;
+                }
+              });
+              if (match) {
+                ranges.push(new vscode.NotebookRange(match.index, match.index + 1));
+              }
+            });
+
+            vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor.document, {
+              selections: ranges,
+            });
+          }
+
+          return;
+        } catch (e) {
+          // TODO handle error
+          console.error(e);
+        }
+      }
+    );
   }
 }

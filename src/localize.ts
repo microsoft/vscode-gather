@@ -32,6 +32,7 @@ export namespace Common {
     export const couldNotFindSpecs = localize('Gather.couldNotFindSpecs', "Gather couldn't find any package specs.");
     export const couldNotActivateTools = localize('Gather.couldNotActivateTools', "Gathering tools couldn't be activated.");
     export const gathering = localize('Gather.gathering', 'Gathering');
+    export const smartSelecting = localize('Gather.smartSelecting', 'Selecting dependent cells');
     export const activateError = localize('Gather.activateError', 'Gather: Exception at Activate\nPlease reload VS Code');
 }
 

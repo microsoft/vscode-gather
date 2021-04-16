@@ -42,6 +42,27 @@ export async function activate() {
         }
       });
 
+      // Register smart select command
+      commands.registerCommand(Constants.smartSelectCommand, (cell: NotebookCell) => {
+        const id = cell.notebook.uri.toString();
+        const provider = gatherProviderMap.get(id);
+
+        if (provider) {
+            provider.smartSelect(cell);
+        } else {
+          window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+        }
+      });
+
+      // Create ContextKey for when a notebook has cells selected
+      window.onDidChangeNotebookEditorSelection((e) => {
+        if (e.selections.length > 0 && !e.selections[0].isEmpty) {
+          commands.executeCommand(Constants.setContextCommand, Constants.hasCellsSelected, true);
+        } else {
+          commands.executeCommand(Constants.setContextCommand, Constants.hasCellsSelected, false);
+        }
+      });
+
       // Delete the gatherProvider when a notebook is closed.
       notebook.onDidCloseNotebookDocument((notebook) => {
         if (gatherProviderMap.has(notebook.uri.toString())) {
@@ -129,7 +150,7 @@ function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
         return;
       } else {
         // try to get the language from the first cell
-        language = doc.cells[0].document.languageId;
+        language = doc.cellAt(0).document.languageId;
         return;
       }
     }
