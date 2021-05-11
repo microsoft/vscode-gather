@@ -117,8 +117,8 @@
     "test": "mocha --config ./src/test/.mocha.config.json"
   },
   "devDependencies": {
-    "@types/fs-extra": "^5.0.1",
     "@types/copy-webpack-plugin": "^4.4.2",
+    "@types/fs-extra": "^5.0.1",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
@@ -142,7 +142,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^3.1.0",
     "@jupyterlab/services": "^4.2.0",
-    "@msrvida/python-program-analysis": "^0.5.1",
+    "@msrvida/python-program-analysis": "^0.5.3",
     "@opentelemetry/api": "^0.11.0",
     "@opentelemetry/tracing": "^0.11.0",
     "@types/uuid": "^3.4.3",
