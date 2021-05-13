@@ -554,8 +554,7 @@ export namespace vscMockExtHostedTypes {
 
         replaceNotebookCells(
             _uri: vscode.Uri,
-            _start: number,
-            _end: number,
+            _range: vscode.NotebookRange,
             _cells: vscode.NotebookCellData[],
             _metadata?: vscode.WorkspaceEditEntryMetadata
         ): void {

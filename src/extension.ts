@@ -17,7 +17,7 @@ import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
 
 const registeredButtons: Disposable[] = [];
-const gatherProviderMap = new Map<string, IGatherProvider>();
+const gatherProviderMap = new WeakMap<Uri, IGatherProvider>();
 
 export async function activate() {
   try {
@@ -32,8 +32,7 @@ export async function activate() {
 
       // Register command to be executed by native notebooks.
       commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: NotebookCell) => {
-        const id = cell.notebook.uri.toString();
-        const provider = gatherProviderMap.get(id);
+        const provider = gatherProviderMap.get(cell.notebook.uri);
 
         if (provider) {
             provider.gatherCode(cell, false);
@@ -42,17 +41,37 @@ export async function activate() {
         }
       });
 
+      // Register smart select command
+      commands.registerCommand(Constants.smartSelectCommand, (cell: NotebookCell) => {
+        const provider = gatherProviderMap.get(cell.notebook.uri);
+
+        if (provider) {
+            provider.smartSelect(cell);
+        } else {
+          window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+        }
+      });
+
+      // Create ContextKey for when a notebook has cells selected
+      window.onDidChangeNotebookEditorSelection((e) => {
+        if (e.selections.length > 0 && !e.selections[0].isEmpty) {
+          commands.executeCommand(Constants.setContextCommand, Constants.hasCellsSelected, true);
+        } else {
+          commands.executeCommand(Constants.setContextCommand, Constants.hasCellsSelected, false);
+        }
+      });
+
       // Delete the gatherProvider when a notebook is closed.
       notebook.onDidCloseNotebookDocument((notebook) => {
-        if (gatherProviderMap.has(notebook.uri.toString())) {
-          gatherProviderMap.delete(notebook.uri.toString());
+        if (gatherProviderMap.has(notebook.uri)) {
+          gatherProviderMap.delete(notebook.uri);
         }
       });
 
       // Register the gather button to be shown on the Jupyter Extension's webviews.
       const button = jupyter.exports.registerCellToolbarButton(
         async (cell: NotebookCell, isInteractive: boolean, resource: Uri) => {
-          const provider = gatherProviderMap.get(resource.toString());
+          const provider = gatherProviderMap.get(resource);
           if (provider) {
             provider.gatherCode(cell, isInteractive);
           } else {
@@ -67,7 +86,7 @@ export async function activate() {
 
       notebook.onDidChangeCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
         if (e.executionState === NotebookCellExecutionState.Idle) {
-          const provider = gatherProviderMap.get(e.document.uri.toString());
+          const provider = gatherProviderMap.get(e.document.uri);
           if (provider) {
             provider.logExecution(e.cell);
           }
@@ -87,14 +106,14 @@ export async function activate() {
           }
 
           let provider = new GatherProvider(language);
-          gatherProviderMap.set(nbEvent.resource.toString(), provider);
+          gatherProviderMap.set(nbEvent.resource, provider);
         } else if (nbEvent.state === KernelState.restarted) {
-          const provider = gatherProviderMap.get(nbEvent.resource.toString());
+          const provider = gatherProviderMap.get(nbEvent.resource);
           if (provider) {
             provider.resetLog();
           }
         } else if (nbEvent.state === KernelState.executed && nbEvent.cell) {
-          const provider = gatherProviderMap.get(nbEvent.resource.toString());
+          const provider = gatherProviderMap.get(nbEvent.resource);
           if (provider) {
             provider.logExecution(nbEvent.cell);
           }
@@ -110,7 +129,6 @@ export async function activate() {
 
 export async function deactivate() {
   registeredButtons.forEach((b) => b.dispose());
-  gatherProviderMap.clear();
 }
 
 function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
@@ -129,7 +147,7 @@ function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
         return;
       } else {
         // try to get the language from the first cell
-        language = doc.cells[0].document.languageId;
+        language = doc.cellAt(0).document.languageId;
         return;
       }
     }

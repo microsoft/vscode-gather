@@ -7,6 +7,10 @@
         {
             "name": "vscode-jupyter",
             "path": "../vscode-jupyter"
+        },
+        {
+            "name": "vscode-python",
+            "path": "../vscode-python"
         }
     ],
     "settings": {
@@ -28,15 +32,18 @@
             {
                 "type": "extensionHost",
                 "request": "launch",
-                "name": "Jupyter + Gather",
+                "name": "Jupyter + Gather + Python",
                 "args": [
                     "--enable-proposed-api",
+                    "--extensionDevelopmentPath=${workspaceFolder:vscode-python}",
                     "--extensionDevelopmentPath=${workspaceFolder:vscode-jupyter}",
                     "--extensionDevelopmentPath=${workspaceFolder:vscode-gather}"
                 ],
                 "stopOnEntry": false,
                 "sourceMaps": true,
                 "outFiles": [
+                    "${workspaceFolder:vscode-python}/out/**/*.js",
+                    "!${workspaceFolder:vscode-python}/**/node_modules**/*",
                     "${workspaceFolder:vscode-jupyter}/out/**/*.js",
                     "!${workspaceFolder:vscode-jupyter}/**/node_modules**/*",
                     "${workspaceFolder:vscode-gather}/out/**/*.js",
