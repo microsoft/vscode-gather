@@ -2,6 +2,10 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.5.0 (May 14, 2021)
+- Updated vscode engine and proposed api
+- Updated the parser for better cleaning
+
 ## 2021.4.0 (April 1, 2021)
 - Updated vscode engine and proposed api
 
