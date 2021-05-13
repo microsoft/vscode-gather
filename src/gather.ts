@@ -280,7 +280,7 @@ export class GatherProvider implements IGatherProvider {
         try {
           const gatheredCode = this.gatherCodeInternal(vscCell);
           if (gatheredCode.length === 0) {
-            // TODO handle error
+            vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
             return;
           }
           let cells = generateCellsFromString(gatheredCode);
@@ -307,7 +307,7 @@ export class GatherProvider implements IGatherProvider {
 
           return;
         } catch (e) {
-          // TODO handle error
+          vscode.window.showErrorMessage(localize.Common.gatherError());
           console.error(e);
         }
       }
