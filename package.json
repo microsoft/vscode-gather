@@ -39,6 +39,9 @@
     "onCommand:jupyter.createnewinteractive"
   ],
   "main": "./out/extension.js",
+  "capabilities": {
+    "virtualWorkspaces": true
+  },
   "contributes": {
     "commands": [
       {
