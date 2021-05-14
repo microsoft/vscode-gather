@@ -84,7 +84,7 @@ export async function activate() {
       );
       registeredButtons.push(button);
 
-      notebook.onDidChangeCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
+      notebook.onDidChangeNotebookCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
         if (e.executionState === NotebookCellExecutionState.Idle) {
           const provider = gatherProviderMap.get(e.document.uri);
           if (provider) {

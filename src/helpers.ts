@@ -71,11 +71,11 @@ export function convertVscToGatherCell(cell: vscode.NotebookCell): ppa.Cell | un
   const result: ppa.Cell = {
     text: code,
 
-    executionCount: cell.latestExecutionSummary?.executionOrder ?? null,
+    executionCount: cell.executionSummary?.executionOrder ?? null,
     executionEventId: uuid(),
 
     persistentId: cell.document.uri.fragment,
-    hasError: (cell.latestExecutionSummary?.success === false)
+    hasError: (cell.executionSummary?.success === false)
     // tslint:disable-next-line: no-any
   } as any;
   return result;
