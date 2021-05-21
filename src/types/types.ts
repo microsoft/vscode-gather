@@ -63,4 +63,6 @@ export interface IGatherProvider {
   gatherCode(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void>;
   smartSelect(vscCell: vscode.NotebookCell): Promise<void>;
   resetLog(): void;
+  gatherWithoutKernel(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void>;
+  smartSelectWithoutKernel(vscCell: vscode.NotebookCell): Promise<void>;
 }

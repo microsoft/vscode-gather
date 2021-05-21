@@ -102,6 +102,7 @@ export class GatherProvider implements IGatherProvider {
         this.gatherTimer = new StopWatch();
         const gatheredCode = this.gatherCodeInternal(vscCell);
         if (gatheredCode.length === 0) {
+          vscode.window.showInformationMessage(localize.Common.analysisEmpty());
           return;
         }
 
@@ -150,35 +151,48 @@ export class GatherProvider implements IGatherProvider {
 
         // Call internal slice method
         const slice = this._executionSlicer.sliceLatestExecution(gatherCell.persistentId);
-        const PpaResult = slice.cellSlices
-          .reduce(concat, "")
-          .replace(/#%%/g, defaultCellMarker)
-          .trim();
 
-        if (PpaResult.length === 0) {
-          vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
-          return "";
+        if (slice) {
+          const PpaResult = slice.cellSlices
+            .reduce(concat, "")
+            .replace(/#%%/g, defaultCellMarker)
+            .trim();
+
+          if (PpaResult.length === 0) {
+            vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
+            return "";
+          }
+
+          return PpaResult;
         }
-
-        return PpaResult;
-      // }
-
-      // if (vscCell.language === 'C#') {
-      //   C# work
-      // }
-
-      // return defaultCellMarker + localize.Common.notAvailable() + ' in ' + vscCell.language;
+        
+        sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
+        return defaultCellMarker + newline + localize.Common.gatherError() + newline + localize.Common.couldNotAnalyze();
     } catch (e) {
-      // Cannot read property 'cellSlices' of undefined
-      if ((e.message as string).includes('cellSlices') && e.message.includes('undefined')) {
-        vscode.window.showInformationMessage(localize.Common.runCells());
-        return "";
-      }
-      vscode.window.showErrorMessage(localize.Common.gatherError());
       console.error(e);
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
       return defaultCellMarker + newline + localize.Common.gatherError() + newline + (e as string);
     }
+  }
+
+  public async gatherWithoutKernel(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void> {
+    await this.initPromise;
+
+    // Log all the cells up to vcsCell
+    for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
+      const cell = vscCell.notebook.cellAt(index);
+      await this.logExecution(cell);
+
+      if (cell.index === vscCell.index) {
+        break;
+      }
+    }
+
+    // Gather normally
+    await this.gatherCode(vscCell, toScript);
+
+    // End by reseting the log
+    await this.resetLog();
   }
 
   private async init(): Promise<void> {
@@ -213,10 +227,6 @@ export class GatherProvider implements IGatherProvider {
         throw ex;
       }
     }
-
-    // if (this.language === 'C#') {
-    //   C# work
-    // }
   }
 
   private async showFile(gatheredCode: string, filename: string) {
@@ -283,6 +293,10 @@ export class GatherProvider implements IGatherProvider {
             vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
             return;
           }
+          if (gatheredCode.includes(localize.Common.gatherError())) {
+            vscode.window.showErrorMessage(localize.Common.couldNotAnalyze());
+            return;
+          }
           let cells = generateCellsFromString(gatheredCode);
 
           if (vscode.window.activeNotebookEditor) {
@@ -312,5 +326,25 @@ export class GatherProvider implements IGatherProvider {
         }
       }
     );
+  }
+
+  public async smartSelectWithoutKernel(vscCell: vscode.NotebookCell): Promise<void> {
+    await this.initPromise;
+
+    // Log all the cells up to vcsCell
+    for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
+      const cell = vscCell.notebook.cellAt(index);
+      await this.logExecution(cell);
+
+      if (cell.index === vscCell.index) {
+        break;
+      }
+    }
+
+    // Smart select normally
+    await this.smartSelect(vscCell);
+
+    // End by reseting the log
+    await this.resetLog();
   }
 }
