@@ -176,23 +176,29 @@ export class GatherProvider implements IGatherProvider {
   }
 
   public async gatherWithoutKernel(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void> {
-    await this.initPromise;
+    try {
+      await this.initPromise;
 
-    // Log all the cells up to vcsCell
-    for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
-      const cell = vscCell.notebook.cellAt(index);
-      await this.logExecution(cell);
+      // Log all the cells up to vcsCell
+      for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
+        const cell = vscCell.notebook.cellAt(index);
+        await this.logExecution(cell);
 
-      if (cell.index === vscCell.index) {
-        break;
+        if (cell.index === vscCell.index) {
+          break;
+        }
       }
+
+      // Gather normally
+      await this.gatherCode(vscCell, toScript);
     }
-
-    // Gather normally
-    await this.gatherCode(vscCell, toScript);
-
-    // End by reseting the log
-    await this.resetLog();
+    catch (e) {
+      console.error(e);
+    }
+    finally {
+      // End by reseting the log
+      await this.resetLog();
+    }
   }
 
   private async init(): Promise<void> {
@@ -329,22 +335,27 @@ export class GatherProvider implements IGatherProvider {
   }
 
   public async smartSelectWithoutKernel(vscCell: vscode.NotebookCell): Promise<void> {
-    await this.initPromise;
+    try {
+      await this.initPromise;
 
-    // Log all the cells up to vcsCell
-    for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
-      const cell = vscCell.notebook.cellAt(index);
-      await this.logExecution(cell);
+      // Log all the cells up to vcsCell
+      for (let index = 0; index < vscCell.notebook.getCells().length; index++) {
+        const cell = vscCell.notebook.cellAt(index);
+        await this.logExecution(cell);
 
-      if (cell.index === vscCell.index) {
-        break;
+        if (cell.index === vscCell.index) {
+          break;
+        }
       }
+
+      // Smart select normally
+      await this.smartSelect(vscCell);
     }
-
-    // Smart select normally
-    await this.smartSelect(vscCell);
-
-    // End by reseting the log
-    await this.resetLog();
+    catch (e) {
+      console.error(e);
+    } finally {
+      // End by reseting the log
+      await this.resetLog();
+    }
   }
 }
