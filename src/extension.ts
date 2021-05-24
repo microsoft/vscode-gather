@@ -32,23 +32,43 @@ export async function activate() {
 
       // Register command to be executed by native notebooks.
       commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: NotebookCell) => {
-        const provider = gatherProviderMap.get(cell.notebook.uri);
+        let provider = gatherProviderMap.get(cell.notebook.uri);
 
         if (provider) {
             provider.gatherCode(cell, false);
         } else {
-          window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+          let language: string;
+
+          try {
+            language = cell.document.languageId;
+          } catch {
+            // In case of error, default to python
+            language = Constants.PYTHON_LANGUAGE;
+          }
+
+          provider = new GatherProvider(language);
+          provider.gatherWithoutKernel(cell, false);
         }
       });
 
       // Register smart select command
       commands.registerCommand(Constants.smartSelectCommand, (cell: NotebookCell) => {
-        const provider = gatherProviderMap.get(cell.notebook.uri);
+        let provider = gatherProviderMap.get(cell.notebook.uri);
 
         if (provider) {
             provider.smartSelect(cell);
         } else {
-          window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
+          let language: string;
+
+          try {
+            language = cell.document.languageId;
+          } catch {
+            // In case of error, default to python
+            language = Constants.PYTHON_LANGUAGE;
+          }
+
+          provider = new GatherProvider(language);
+          provider.smartSelectWithoutKernel(cell);
         }
       });
 

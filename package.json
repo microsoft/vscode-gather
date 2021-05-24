@@ -75,13 +75,13 @@
       "notebook/cell/title": [
         {
           "command": "gather.gatherCodeNativeNotebook",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellExecutionState == succeeded",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code",
           "group": "inline/cell@2",
           "category": "Gather"
         },
         {
           "command": "gather.smartSelect",
-          "when": "notebookViewType == jupyter-notebook && notebookCellType == code && notebookCellExecutionState == succeeded",
+          "when": "notebookViewType == jupyter-notebook && notebookCellType == code",
           "group": "inline/cell@2",
           "category": "Gather"
         }
