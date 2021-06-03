@@ -3,12 +3,13 @@ import {
   commands,
   Disposable,
   extensions,
-  notebook,
+  notebooks,
   NotebookCell,
   NotebookCellExecutionState,
   NotebookCellExecutionStateChangeEvent,
   Uri,
-  window
+  window,
+  workspace
 } from "vscode";
 import { Constants, IGatherProvider, KernelState, KernelStateEventArgs, NotebookCellRunState, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
@@ -82,7 +83,7 @@ export async function activate() {
       });
 
       // Delete the gatherProvider when a notebook is closed.
-      notebook.onDidCloseNotebookDocument((notebook) => {
+      workspace.onDidCloseNotebookDocument((notebook) => {
         if (gatherProviderMap.has(notebook.uri)) {
           gatherProviderMap.delete(notebook.uri);
         }
@@ -104,9 +105,9 @@ export async function activate() {
       );
       registeredButtons.push(button);
 
-      notebook.onDidChangeNotebookCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
-        if (e.executionState === NotebookCellExecutionState.Idle) {
-          const provider = gatherProviderMap.get(e.document.uri);
+      notebooks.onDidChangeNotebookCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
+        if (e.state === NotebookCellExecutionState.Idle) {
+          const provider = gatherProviderMap.get(e.cell.notebook.uri);
           if (provider) {
             provider.logExecution(e.cell);
           }
@@ -154,7 +155,7 @@ export async function deactivate() {
 function findLanguageInNotebook(nbEvent: KernelStateEventArgs): string {
   let language: string | undefined;
 
-  notebook.notebookDocuments.forEach((doc) => {
+  workspace.notebookDocuments.forEach((doc) => {
     if (doc.uri.toString() === nbEvent.resource.toString()) {
       // try to get the language from the metadata
       if (
