@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality in the Python language to the Jupyter Extension",
-  "version": "2021.5.0",
+  "version": "2021.6.0",
   "publisher": "ms-python",
   "author": {
     "name": "Microsoft Corporation"
@@ -81,7 +81,7 @@
         },
         {
           "command": "gather.smartSelect",
-          "when": "notebookType == jupyter-notebook && notebookCellType == code",
+          "when": "notebookType == jupyter-notebookxxx && notebookCellType == code",
           "group": "inline/cell@2",
           "category": "Gather"
         }
