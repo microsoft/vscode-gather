@@ -165,7 +165,7 @@ export function createNotebookContent(cells: SimpleCell[]): string {
 
 export function generateCellsFromString(script: string): SimpleCell[] {
   const cells: SimpleCell[] = [];
-  const lines = splitLines(script);
+  const lines = splitLines(script, {trim: false, removeEmptyEntries: true});
 
   const settings = vscode.workspace.getConfiguration();
   const defaultCellMarker: string = settings ?

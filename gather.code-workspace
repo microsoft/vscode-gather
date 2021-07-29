@@ -5,6 +5,10 @@
             "name": "vscode-gather"
         },
         {
+            "name": "PPA",
+            "path": "../python-program-analysis"
+        },
+        {
             "name": "vscode-jupyter",
             "path": "../vscode-jupyter"
         },
