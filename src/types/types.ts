@@ -33,13 +33,6 @@ export type KernelStateEventArgs = {
   cell?: vscode.NotebookCell;
 };
 
-export enum NotebookCellRunState {
-  Running = 1,
-  Idle = 2,
-  Success = 3,
-  Error = 4
-}
-
 export enum KernelState {
   started,
   executed,

@@ -2,7 +2,6 @@
 import {
   commands,
   Disposable,
-  extensions,
   notebooks,
   NotebookCell,
   NotebookCellExecutionState,
@@ -11,9 +10,8 @@ import {
   window,
   workspace
 } from "vscode";
-import { Constants, IGatherProvider, KernelState, KernelStateEventArgs, NotebookCellRunState, Telemetry } from "./types/types";
+import { Constants, IGatherProvider, KernelStateEventArgs, Telemetry } from "./types/types";
 import { GatherProvider } from "./gather";
-import { IJupyterExtensionApi } from "./types/jupyter";
 import { sendTelemetryEvent } from "./telemetry";
 import * as localize from './localize';
 
@@ -23,14 +21,6 @@ const gatherProviderMap = new WeakMap<Uri, IGatherProvider>();
 export async function activate() {
   try {
     sendTelemetryEvent(Telemetry.GatherIsInstalled);
-    const jupyter = extensions.getExtension<IJupyterExtensionApi>(Constants.jupyterExtension);
-
-    if (jupyter) {
-      if (!jupyter.isActive) {
-        await jupyter.activate();
-        await jupyter.exports.ready;
-      }
-
       // Register command to be executed by native notebooks.
       commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: NotebookCell) => {
         let provider = gatherProviderMap.get(cell.notebook.uri);
@@ -89,54 +79,11 @@ export async function activate() {
         }
       });
 
-      // Register the gather button to be shown on the Jupyter Extension's webviews.
-      const button = jupyter.exports.registerCellToolbarButton(
-        async (cell: NotebookCell, isInteractive: boolean, resource: Uri) => {
-          const provider = gatherProviderMap.get(resource);
-          if (provider) {
-            provider.gatherCode(cell, isInteractive);
-          } else {
-            window.showInformationMessage(localize.Common.runCells() + ' ' + localize.Common.reopenNotebooks());
-          }
-        },
-        'gather',
-        [NotebookCellRunState.Success],
-        localize.Common.gatherTooltip()
-      );
-      registeredButtons.push(button);
-
       notebooks.onDidChangeNotebookCellExecutionState((e: NotebookCellExecutionStateChangeEvent) => {
-        if (e.state === NotebookCellExecutionState.Idle) {
+        if (e.state === NotebookCellExecutionState.Idle && e.cell.document.languageId === 'python') {
           const provider = gatherProviderMap.get(e.cell.notebook.uri);
           if (provider) {
             provider.logExecution(e.cell);
-          }
-        }
-      });
-
-      // Execute the gather events
-      jupyter.exports.onKernelStateChange((nbEvent: KernelStateEventArgs) => {
-        if (nbEvent.state === KernelState.started) {
-          let language: string;
-
-          try {
-            language = findLanguageInNotebook(nbEvent);
-          } catch {
-            // Interactive Window case just assumes python
-            language = Constants.PYTHON_LANGUAGE;
-          }
-
-          let provider = new GatherProvider(language);
-          gatherProviderMap.set(nbEvent.resource, provider);
-        } else if (nbEvent.state === KernelState.restarted) {
-          const provider = gatherProviderMap.get(nbEvent.resource);
-          if (provider) {
-            provider.resetLog();
-          }
-        } else if (nbEvent.state === KernelState.executed && nbEvent.cell) {
-          const provider = gatherProviderMap.get(nbEvent.resource);
-          if (provider) {
-            provider.logExecution(nbEvent.cell);
           }
         }
       });
