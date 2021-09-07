@@ -6,14 +6,12 @@ export namespace Constants {
   export const EXTENSION_ROOT_DIR = folderName === 'client' ? path.join(__dirname, '..', '..') : path.join(__dirname, '..', '..', '..', '..');
   export const GatherExtension = 'ms-python.gather';
   export const DefaultCodeCellMarker = "# %%";
-  export const jupyterExtension = 'ms-toolsai.jupyter';
   export const gatherNativeNotebookCommand = 'gather.gatherCodeNativeNotebook';
   export const smartSelectCommand = 'gather.smartSelect';
   export const gatherToScriptSetting = 'gather.gatherToScript';
   export const gatherSpecPathSetting = 'gather.gatherSpecPath';
   export const PYTHON_LANGUAGE = 'python';
   export const defaultCellMarkerSetting = 'jupyter.defaultCellMarker';
-  export const openNotebookCommand = 'jupyter.opennotebook';
   export const hasCellsSelected = 'hasCellsSelected';
   export const setContextCommand = 'setContext';
 }
@@ -25,25 +23,6 @@ export enum Telemetry {
   GatherException = 'DS_INTERNAL.GATHER_EXCEPTION',
   GatheredNotebookSaved = 'DATASCIENCE.GATHERED_NOTEBOOK_SAVED',
   GatherQualityReport = 'DS_INTERNAL.GATHER_QUALITY_REPORT',
-}
-
-export type KernelStateEventArgs = {
-  resource: vscode.Uri;
-  state: KernelState;
-  cell?: vscode.NotebookCell;
-};
-
-export enum NotebookCellRunState {
-  Running = 1,
-  Idle = 2,
-  Success = 3,
-  Error = 4
-}
-
-export enum KernelState {
-  started,
-  executed,
-  restarted
 }
 
 export enum OSType {

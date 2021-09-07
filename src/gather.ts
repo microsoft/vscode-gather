@@ -1,9 +1,21 @@
 import * as ppa from "@msrvida/python-program-analysis";
-import * as vscode from "vscode";
+import { 
+  env,
+  NotebookCell,
+  NotebookCellData,
+  NotebookCellKind,
+  NotebookData,
+  NotebookRange,
+  ProgressLocation,
+  UIKind,
+  ViewColumn,
+  window,
+  workspace
+} from "vscode";
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
-import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
+import { Constants, IGatherProvider, Telemetry } from "./types/types";
+import { arePathsSame, concat, convertVscToGatherCell, countCells, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
 import * as localize from './localize';
 import { sendTelemetryEvent } from "./telemetry";
@@ -28,7 +40,7 @@ export class GatherProvider implements IGatherProvider {
     }
   }
 
-  public async logExecution(vscCell: vscode.NotebookCell): Promise<void> {
+  public async logExecution(vscCell: NotebookCell): Promise<void> {
     try {
       if (vscCell) {
         let code = '';
@@ -49,21 +61,22 @@ export class GatherProvider implements IGatherProvider {
       }
       await this.initPromise;
 
-      // Assume Python until proposed api is out
-      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
-      const gatherCell = convertVscToGatherCell(vscCell);
-
-      if (gatherCell && this._executionSlicer) {
-        this._executionSlicer.logExecution(gatherCell);
+      // If the execution count is 1, there was a kernel reset, so reset the log
+      if (vscCell.executionSummary?.executionOrder === 1) {
+        await this.resetLog();
       }
-      // }
 
-      // if (vscCell.language === 'C#') {
-      //   C# work
-      // }
+      // Assume Python until proposed api is out
+      if (vscCell.document.languageId === Constants.PYTHON_LANGUAGE) {
+        const gatherCell = convertVscToGatherCell(vscCell);
+
+        if (gatherCell && this._executionSlicer) {
+          this._executionSlicer.logExecution(gatherCell);
+        }
+      }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
-      vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText());
+      window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText());
       console.error(e);
       throw e;
     }
@@ -80,13 +93,9 @@ export class GatherProvider implements IGatherProvider {
           this._executionSlicer.reset();
         }
       }
-      
-      // if (this.language === C#) {
-      //   C# work
-      // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
-      vscode.window.showErrorMessage(localize.Common.resetLog());
+      window.showErrorMessage(localize.Common.resetLog());
       console.error(e);
       throw e;
     }
@@ -95,18 +104,18 @@ export class GatherProvider implements IGatherProvider {
   /**
    * For a given code cell, returns a string representing a program containing all the code it depends on.
    */
-  public async gatherCode(vscCell: vscode.NotebookCell, toScript: boolean = false): Promise<void> {
-    vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: localize.Common.gathering() }, 
+  public async gatherCode(vscCell: NotebookCell, toScript: boolean = false): Promise<void> {
+    window.withProgress(
+      { location: ProgressLocation.Notification, title: localize.Common.gathering() }, 
       async () => {
         this.gatherTimer = new StopWatch();
         const gatheredCode = this.gatherCodeInternal(vscCell);
         if (gatheredCode.length === 0) {
-          vscode.window.showInformationMessage(localize.Common.analysisEmpty());
+          window.showInformationMessage(localize.Common.analysisEmpty());
           return;
         }
 
-        const settings = vscode.workspace.getConfiguration();
+        const settings = workspace.getConfiguration();
         const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
 
         if (gatherToScript) {
@@ -128,8 +137,8 @@ export class GatherProvider implements IGatherProvider {
     );      
   }
 
-  private gatherCodeInternal(vscCell: vscode.NotebookCell): string {
-    const settings = vscode.workspace.getConfiguration();
+  private gatherCodeInternal(vscCell: NotebookCell): string {
+    const settings = workspace.getConfiguration();
     const defaultCellMarker: string = settings ?
       settings.get(Constants.defaultCellMarkerSetting) as string :
       Constants.DefaultCodeCellMarker;
@@ -139,13 +148,13 @@ export class GatherProvider implements IGatherProvider {
       // Assume Python until proposed api is out
       // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
         if (!this._executionSlicer) {
-          vscode.window.showErrorMessage(localize.Common.notAvailable());
+          window.showErrorMessage(localize.Common.notAvailable());
           return "";
         }
 
         const gatherCell = convertVscToGatherCell(vscCell);
         if (!gatherCell) {
-          vscode.window.showErrorMessage(localize.Common.errorTranslatingCell());
+          window.showErrorMessage(localize.Common.errorTranslatingCell());
           return "";
         }
 
@@ -159,7 +168,7 @@ export class GatherProvider implements IGatherProvider {
             .trim();
 
           if (PpaResult.length === 0) {
-            vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
+            window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
             return "";
           }
 
@@ -175,7 +184,7 @@ export class GatherProvider implements IGatherProvider {
     }
   }
 
-  public async gatherWithoutKernel(vscCell: vscode.NotebookCell, toScript: boolean): Promise<void> {
+  public async gatherWithoutKernel(vscCell: NotebookCell, toScript: boolean): Promise<void> {
     try {
       await this.initPromise;
 
@@ -205,7 +214,7 @@ export class GatherProvider implements IGatherProvider {
     if (this.language === Constants.PYTHON_LANGUAGE) {
       try {
         if (ppa) {
-          const settings = vscode.workspace.getConfiguration();
+          const settings = workspace.getConfiguration();
           let additionalSpecPath: string | undefined;
           if (settings) {
             additionalSpecPath = settings.get(Constants.gatherSpecPathSetting);
@@ -236,7 +245,7 @@ export class GatherProvider implements IGatherProvider {
   }
 
   private async showFile(gatheredCode: string, filename: string) {
-    const settings = vscode.workspace.getConfiguration();
+    const settings = workspace.getConfiguration();
     const defaultCellMarker: string = settings ?
       settings.get(Constants.defaultCellMarkerSetting) as string :
       Constants.DefaultCodeCellMarker;
@@ -247,94 +256,96 @@ export class GatherProvider implements IGatherProvider {
       gatheredCode = gatheredCode.replace(re, '');
     }
 
-    const annotatedScript = vscode.env?.uiKind === vscode.UIKind?.Web
+    const annotatedScript = env?.uiKind === UIKind?.Web
       ? `${localize.Common.gatheredScriptDescriptionWithoutSurvey()}${defaultCellMarker}\n${gatheredCode}`
       : `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
 
     // Don't want to open the gathered code on top of the interactive window
-    let viewColumn: vscode.ViewColumn | undefined;
-    const fileNameMatch = vscode.window.visibleTextEditors.filter((textEditor) =>
+    let viewColumn: ViewColumn | undefined;
+    const fileNameMatch = window.visibleTextEditors.filter((textEditor) =>
       arePathsSame(textEditor.document.fileName, filename)
     );
-    const definedVisibleEditors = vscode.window.visibleTextEditors.filter(
+    const definedVisibleEditors = window.visibleTextEditors.filter(
         (textEditor) => textEditor.viewColumn !== undefined
     );
-    if (vscode.window.visibleTextEditors.length > 0 && fileNameMatch.length > 0) {
+    if (window.visibleTextEditors.length > 0 && fileNameMatch.length > 0) {
         // Original file is visible
         viewColumn = fileNameMatch[0].viewColumn;
-    } else if (vscode.window.visibleTextEditors.length > 0 && definedVisibleEditors.length > 0) {
+    } else if (window.visibleTextEditors.length > 0 && definedVisibleEditors.length > 0) {
         // There is a visible text editor, just not the original file. Make sure viewColumn isn't undefined
         viewColumn = definedVisibleEditors[0].viewColumn;
     } else {
         // Only one panel open and interactive window is occupying it, or original file is open but hidden
-        viewColumn = vscode.ViewColumn.Beside;
+        viewColumn = ViewColumn.Beside;
     }
 
-    const textDoc = await vscode.workspace.openTextDocument({ language: Constants.PYTHON_LANGUAGE, content: annotatedScript });
-    await vscode.window.showTextDocument(textDoc, viewColumn, true);
+    const textDoc = await workspace.openTextDocument({ language: Constants.PYTHON_LANGUAGE, content: annotatedScript });
+    await window.showTextDocument(textDoc, viewColumn, true);
   }
 
   private async showNotebook(gatheredCode: string) {
-    let cells: SimpleCell[] = [
-      {
-        source: vscode.env.uiKind === vscode.UIKind?.Web
-          ? [localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()]
-          : [localize.Common.gatheredNotebookDescriptionInMarkdown()],
-        type: 'markdown'
-      }
-    ];
-    cells = cells.concat(generateCellsFromString(gatheredCode));
-    const notebook = createNotebookContent(cells);
+    const cells = generateCellsFromString(gatheredCode);
 
-    await vscode.commands.executeCommand(Constants.openNotebookCommand, undefined, notebook);
+    const nbCells = cells.map((cell) => {
+      return new NotebookCellData(NotebookCellKind.Code, cell.source.join('\r\n'), Constants.PYTHON_LANGUAGE);
+    });
+
+    let finalCells: NotebookCellData[] = [
+      new NotebookCellData(NotebookCellKind.Markup, env.uiKind === UIKind?.Web
+        ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
+        : localize.Common.gatheredNotebookDescriptionInMarkdown(), 'Markdown')
+    ];
+    finalCells.push(...nbCells);
+    
+    await workspace.openNotebookDocument('jupyter-notebook', new NotebookData(finalCells));
   }
 
-  public async smartSelect(vscCell: vscode.NotebookCell): Promise<void> {
-    vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: localize.Common.smartSelecting() }, 
+  public async smartSelect(vscCell: NotebookCell): Promise<void> {
+    window.withProgress(
+      { location: ProgressLocation.Notification, title: localize.Common.smartSelecting() }, 
       async () => {
         try {
           const gatheredCode = this.gatherCodeInternal(vscCell);
           if (gatheredCode.length === 0) {
-            vscode.window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
+            window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
             return;
           }
           if (gatheredCode.includes(localize.Common.gatherError())) {
-            vscode.window.showErrorMessage(localize.Common.couldNotAnalyze());
+            window.showErrorMessage(localize.Common.couldNotAnalyze());
             return;
           }
           let cells = generateCellsFromString(gatheredCode);
 
-          if (vscode.window.activeNotebookEditor) {
-            const ranges: vscode.NotebookRange[] = [];
+          if (window.activeNotebookEditor) {
+            const ranges: NotebookRange[] = [];
 
             // Map gathered cells to notebook cells
             cells.forEach(gatheredCell => {
-              const match = vscode.window.activeNotebookEditor?.document.getCells().find(notebookCell => {
+              const match = window.activeNotebookEditor?.document.getCells().find(notebookCell => {
                 if (notebookCell.document.getText().includes(gatheredCell.source.join('\n'))) {
                   return notebookCell;
                 }
               });
               if (match) {
-                ranges.push(new vscode.NotebookRange(match.index, match.index + 1));
+                ranges.push(new NotebookRange(match.index, match.index + 1));
               }
             });
 
-            vscode.window.showNotebookDocument(vscode.window.activeNotebookEditor.document, {
+            window.showNotebookDocument(window.activeNotebookEditor.document, {
               selections: ranges,
             });
           }
 
           return;
         } catch (e) {
-          vscode.window.showErrorMessage(localize.Common.gatherError());
+          window.showErrorMessage(localize.Common.gatherError());
           console.error(e);
         }
       }
     );
   }
 
-  public async smartSelectWithoutKernel(vscCell: vscode.NotebookCell): Promise<void> {
+  public async smartSelectWithoutKernel(vscCell: NotebookCell): Promise<void> {
     try {
       await this.initPromise;
 

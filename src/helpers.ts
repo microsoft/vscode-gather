@@ -136,33 +136,6 @@ function getOSType(platform: string = process.platform): OSType {
   }
 }
 
-export function createNotebookContent(cells: SimpleCell[]): string {
-  const metadata = {
-    language_info: {},
-    orig_nbformat: 2,
-    kernelspec: {
-      display_name: '',
-      name: ''
-    }
-  };
-
-  const json = {
-    cells: cells.map((cell) => {
-      return {
-        source: cell.source,
-        cell_type: cell.type,
-        metadata: {},
-        execution_count: 0,
-        outputs: []
-      };
-    }),
-    nbformat: 4,
-    nbformat_minor: 2,
-    metadata: metadata
-  };
-  return JSON.stringify(json);
-}
-
 export function generateCellsFromString(script: string): SimpleCell[] {
   const cells: SimpleCell[] = [];
   const lines = splitLines(script, {trim: false, removeEmptyEntries: true});
