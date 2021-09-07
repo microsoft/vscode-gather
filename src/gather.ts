@@ -2,8 +2,8 @@ import * as ppa from "@msrvida/python-program-analysis";
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { Constants, IGatherProvider, SimpleCell, Telemetry } from "./types/types";
-import { arePathsSame, concat, convertVscToGatherCell, countCells, createNotebookContent, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
+import { Constants, IGatherProvider, Telemetry } from "./types/types";
+import { arePathsSame, concat, convertVscToGatherCell, countCells, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
 import * as util from "util";
 import * as localize from './localize';
 import { sendTelemetryEvent } from "./telemetry";
@@ -49,18 +49,19 @@ export class GatherProvider implements IGatherProvider {
       }
       await this.initPromise;
 
-      // Assume Python until proposed api is out
-      // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
-      const gatherCell = convertVscToGatherCell(vscCell);
-
-      if (gatherCell && this._executionSlicer) {
-        this._executionSlicer.logExecution(gatherCell);
+      // If the execution count is 1, there was a kernel reset, so reset the log
+      if (vscCell.executionSummary?.executionOrder === 1) {
+        this.resetLog();
       }
-      // }
 
-      // if (vscCell.language === 'C#') {
-      //   C# work
-      // }
+      // Assume Python until proposed api is out
+      if (vscCell.document.languageId === Constants.PYTHON_LANGUAGE) {
+        const gatherCell = convertVscToGatherCell(vscCell);
+
+        if (gatherCell && this._executionSlicer) {
+          this._executionSlicer.logExecution(gatherCell);
+        }
+      }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
       vscode.window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText());
@@ -80,10 +81,6 @@ export class GatherProvider implements IGatherProvider {
           this._executionSlicer.reset();
         }
       }
-      
-      // if (this.language === C#) {
-      //   C# work
-      // }
     } catch (e) {
       sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
       vscode.window.showErrorMessage(localize.Common.resetLog());
@@ -275,18 +272,20 @@ export class GatherProvider implements IGatherProvider {
   }
 
   private async showNotebook(gatheredCode: string) {
-    let cells: SimpleCell[] = [
-      {
-        source: vscode.env.uiKind === vscode.UIKind?.Web
-          ? [localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()]
-          : [localize.Common.gatheredNotebookDescriptionInMarkdown()],
-        type: 'markdown'
-      }
-    ];
-    cells = cells.concat(generateCellsFromString(gatheredCode));
-    const notebook = createNotebookContent(cells);
+    const cells = generateCellsFromString(gatheredCode);
 
-    await vscode.commands.executeCommand(Constants.openNotebookCommand, undefined, notebook);
+    const nbCells = cells.map((cell) => {
+      return new vscode.NotebookCellData(vscode.NotebookCellKind.Code, cell.source.join('\r\n'), Constants.PYTHON_LANGUAGE);
+    });
+
+    let finalCells: vscode.NotebookCellData[] = [
+      new vscode.NotebookCellData(vscode.NotebookCellKind.Markup, vscode.env.uiKind === vscode.UIKind?.Web
+        ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
+        : localize.Common.gatheredNotebookDescriptionInMarkdown(), 'Markdown')
+    ];
+    finalCells.push(...nbCells);
+    
+    await vscode.workspace.openNotebookDocument('jupyter-notebook', new vscode.NotebookData(finalCells));
   }
 
   public async smartSelect(vscCell: vscode.NotebookCell): Promise<void> {

@@ -53,7 +53,7 @@
       {
         "command": "gather.smartSelect",
         "title": "Smart Select",
-        "icon": "$(edit)",
+        "icon": "$(wand)",
         "category": "Gather"
       }
     ],
