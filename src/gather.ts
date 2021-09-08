@@ -297,7 +297,11 @@ export class GatherProvider implements IGatherProvider {
     ];
     finalCells.push(...nbCells);
     
-    await workspace.openNotebookDocument('jupyter-notebook', new NotebookData(finalCells));
+    const doc = await workspace.openNotebookDocument('jupyter-notebook', new NotebookData(finalCells));
+    await window.showNotebookDocument(doc, {
+      viewColumn: 1,
+      preserveFocus: true
+    });
   }
 
   public async smartSelect(vscCell: NotebookCell): Promise<void> {
