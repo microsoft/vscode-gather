@@ -2103,7 +2103,7 @@ export namespace vscMockExtHostedTypes {
             this.name = code ? `${code} (FileSystemError)` : `FileSystemError`;
 
             // workaround when extending builtin objects and when compiling to ES5, see:
-            // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+            // https://github.com/Microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
             if (typeof (<any>Object).setPrototypeOf === 'function') {
                 (<any>Object).setPrototypeOf(this, FileSystemError.prototype);
             }

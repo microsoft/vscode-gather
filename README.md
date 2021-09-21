@@ -8,15 +8,15 @@ Please note that the Python analysis is quite conservative, so if it is unsure w
 
 - **Step 1.** Install both the Jupyter and the Gather extension for Visual Studio Code.
 
-    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/master/images/step1.PNG>
+    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/main/images/step1.PNG>
 
 - **Step 2.** Run cells on the Interactive Window or Notebook Editor to do your work.
 
-    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/master/images/step2.PNG>
+    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/main/images/step2.PNG>
 
 - **Step 3.** When you're satisfied with a cell's output, click the Gather icon to build a new notebook or script that generates that same output.
 
-    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/master/images/step3.PNG>
+    <img src=https://raw.githubusercontent.com/microsoft/vscode-gather/main/images/step3.PNG>
 
 ## Additional Information
 
