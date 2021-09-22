@@ -22,9 +22,10 @@ export async function activate() {
     // Register command to be executed by native notebooks.
     commands.registerCommand(Constants.gatherNativeNotebookCommand, async (cell: NotebookCell) => {
       let provider = gatherProviderMap.get(cell.notebook.uri);
+      let toScript = cell.notebook.notebookType === 'interactive';
 
       if (provider) {
-          provider.gatherCode(cell, false);
+          provider.gatherCode(cell, toScript);
       } else {
         let language: string;
 
@@ -37,7 +38,7 @@ export async function activate() {
 
         provider = new GatherProvider(language);
         gatherProviderMap.set(cell.notebook.uri, provider);
-        provider.gatherWithoutKernel(cell, false);
+        provider.gatherWithoutKernel(cell, toScript);
       }
     });
 

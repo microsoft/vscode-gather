@@ -1206,7 +1206,6 @@ export namespace vscMockExtHostedTypes {
     export class CompletionItem {
         // @ts-ignore
         label: string;
-        label2?: CompletionItemLabel;
         kind?: CompletionItemKind;
         tags?: CompletionItemTag[];
         detail?: string;
@@ -1230,7 +1229,6 @@ export namespace vscMockExtHostedTypes {
         toJSON(): any {
             return {
                 label: this.label,
-                label2: this.label2,
                 kind: this.kind && CompletionItemKind[this.kind],
                 detail: this.detail,
                 documentation: this.documentation,

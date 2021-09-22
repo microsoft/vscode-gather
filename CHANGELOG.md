@@ -2,6 +2,9 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
+## 2021.9.1 (September 21, 2021)
+- Add Gather functionality to the new interactive window.
+
 ## 2021.6.0 (June 9, 2021)
 - Can now use Gather without having to run cells, this will take into account the whole notebook up to the selected cell.
 - Updated vscode engine and proposed api.
