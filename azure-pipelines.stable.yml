@@ -17,7 +17,7 @@ extends:
         inputs:
           versionSpec: '14.16'
 
-      - script: npm ci
+      - script: npm i
         displayName: Install dependencies
 
       - script: npm run prepublish
