@@ -17,6 +17,10 @@ extends:
         inputs:
           versionSpec: '14.16'
 
+      - task: npmAuthenticate@0
+        inputs:
+          workingFile: '.npmrc'
+
       - script: npm i
         displayName: Install dependencies
 
