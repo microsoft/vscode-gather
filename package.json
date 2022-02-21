@@ -17,7 +17,7 @@
     "url": "https://github.com/microsoft/vscode-jupyter/issues"
   },
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.64.0"
   },
   "categories": [
     "Programming Languages",
