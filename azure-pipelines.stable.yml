@@ -23,6 +23,7 @@ extends:
           customEndpoint: 'vscode-gather-python-program-analysis'
 
       - task: Bash@3
+        displayName: Update .npmrc file
         inputs:
           targetType: 'inline'
           script: |
@@ -31,20 +32,13 @@ extends:
             echo '' >> .npmrc
             echo '; begin auth token' >> .npmrc
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:username=msresearch' >> .npmrc
-            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:_password=$(NPM_TOKEN_GATHER_DUMMY)' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:email=npm requires email to be set but doesnt use the value' >> .npmrc
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:username=msresearch' >> .npmrc
-            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:_password=$(NPM_TOKEN_GATHER_DUMMY)' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:email=npm requires email to be set but doesnt use the value' >> .npmrc
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
-
-
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: |
-            cat .npmrc
 
       - script: npm i
         displayName: Install dependencies
