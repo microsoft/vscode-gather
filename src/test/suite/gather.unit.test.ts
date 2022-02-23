@@ -95,7 +95,7 @@ suite("code gathering unit tests", () => {
       }
 
       const cell: IVscCell = codeCells[codeCells.length - 1];
-      const program = gatherProvider.gatherCode(cell);
+      const program = await gatherProvider.gatherCode(cell);
       const expectedProgram =
         "# %%\nfrom bokeh.plotting import show, figure, output_notebook\n# %%\np=figure(title='demo',x_axis_label='x',y_axis_label='y')\n# %%\nshow(p)";
       assert.equal(program.trim(), expectedProgram.trim());
