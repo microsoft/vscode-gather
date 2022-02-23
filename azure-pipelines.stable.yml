@@ -39,6 +39,13 @@ extends:
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
 
+
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            cat .npmrc
+
       - script: npm i
         displayName: Install dependencies
 
