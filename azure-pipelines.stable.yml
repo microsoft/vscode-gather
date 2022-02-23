@@ -17,11 +17,6 @@ extends:
         inputs:
           versionSpec: '14.16'
 
-      - task: npmAuthenticate@0
-        inputs:
-          workingFile: '.npmrc'
-          customEndpoint: 'vscode-gather-python-program-analysis'
-
       - task: Bash@3
         displayName: Update .npmrc file
         inputs:
