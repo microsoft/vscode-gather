@@ -37,7 +37,7 @@ extends:
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:_password=$(NPM_TOKEN_GATHER_DUMMY)' >> .npmrc
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:email=npm requires email to be set but doesnt use the value' >> .npmrc
             echo '; end auth token' >> .npmrc
-            echo '' .npmrc
+            echo '' >> .npmrc
 
       - script: npm i
         displayName: Install dependencies
