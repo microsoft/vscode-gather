@@ -2,7 +2,7 @@
 
 All notable changes to the "gather-for-the-jupyter-extension" extension will be documented in this file.
 
-## 2022.2.0 (March 3, 2023)
+## 2022.3.0 (March 3, 2023)
 - Updated vscode engine and proposed api.
 
 ## 2021.9.1 (September 21, 2021)
