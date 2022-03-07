@@ -51,5 +51,14 @@ steps:
   - script: npm ci
     displayName: Install dependencies
 
+  - script: npm i -g vsce
+    displayName: Install vsce
+
   - script: npm run build
     displayName: Build
+
+  - script: vsce package -o vscode-gather.vsix
+    displayName: Package
+
+  - publish: $(System.DefaultWorkingDirectory)/vscode-gather.vsix
+    artifact: vscode-gather.vsix
