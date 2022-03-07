@@ -48,9 +48,6 @@ steps:
         echo '; end auth token' >> .npmrc
         echo '' >> .npmrc
 
-  - script: npm i -g npm-force-resolutions
-    displayName: Install vsce
-		
   - script: npm ci
     displayName: Install dependencies
 
