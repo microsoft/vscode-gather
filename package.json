@@ -132,6 +132,7 @@
     "test": "mocha --config ./src/test/.mocha.config.json",
     "download-api": "vscode-dts dev",
     "postdownload-api": "vscode-dts main",
+    "preinstall": "npx npm-force-resolutions",
     "postinstall": "npm run download-api"
   },
   "devDependencies": {
@@ -147,6 +148,7 @@
     "copy-webpack-plugin": "^5.1.1",
     "eslint": "^7.2.0",
     "glob": "^7.1.6",
+    "npm-force-resolutions": "0.0.10",
     "mocha": "^7.2.0",
     "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
@@ -169,7 +171,10 @@
     "path": "^0.12.7",
     "stack-trace": "0.0.10",
     "uuid": "^3.3.2",
-    "vscode-extension-telemetry": "0.1.4",
-    "webpack-bundle-analyzer": "^3.8.0"
+    "vscode-extension-telemetry": "0.1.4"
+  },
+  "resolutions": {
+    "url-parse": "1.5.8",
+    "glob-parent": "5.1.2"
   }
 }

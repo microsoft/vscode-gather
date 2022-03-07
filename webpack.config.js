@@ -2,7 +2,6 @@
 "use strict";
 
 const path = require("path");
-const analyzer = require("webpack-bundle-analyzer");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const copyWebpackPlugin = require('copy-webpack-plugin');
 

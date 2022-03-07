@@ -35,7 +35,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        echo 'registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
+        echo '@msrvida:registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
         echo 'always-auth=true' >> .npmrc
         echo '' >> .npmrc
         echo '; begin auth token' >> .npmrc
@@ -53,6 +53,7 @@ steps:
 
   - script: npm i -g vsce
     displayName: Install vsce
+
 
   - script: npm run build
     displayName: Build
