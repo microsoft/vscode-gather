@@ -132,7 +132,7 @@
     "test": "mocha --config ./src/test/.mocha.config.json",
     "download-api": "vscode-dts dev",
     "postdownload-api": "vscode-dts main",
-    "preinstall": "npx npm-force-resolutions",
+    "preinstall": "npm-force-resolutions",
     "postinstall": "npm run download-api"
   },
   "devDependencies": {
