@@ -4,6 +4,7 @@
   "description": "Adds gather functionality in the Python language to the Jupyter Extension",
   "version": "2022.3.0",
   "publisher": "ms-python",
+  "preview": true,
   "author": {
     "name": "Microsoft Corporation"
   },
