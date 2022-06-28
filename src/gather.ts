@@ -1,5 +1,5 @@
 import * as ppa from "@msrvida/python-program-analysis";
-import { 
+import {
   env,
   NotebookCell,
   NotebookCellData,
@@ -10,14 +10,23 @@ import {
   UIKind,
   ViewColumn,
   window,
-  workspace
+  workspace,
 } from "vscode";
-import * as path from 'path';
-import * as fs from 'fs-extra';
+import * as path from "path";
+import * as fs from "fs-extra";
 import { Constants, IGatherProvider, Telemetry } from "./types/types";
-import { arePathsSame, concat, convertVscToGatherCell, countCells, generateCellsFromString, pathExists, splitLines, StopWatch } from "./helpers";
+import {
+  arePathsSame,
+  concat,
+  convertVscToGatherCell,
+  countCells,
+  generateCellsFromString,
+  pathExists,
+  splitLines,
+  StopWatch,
+} from "./helpers";
 import * as util from "util";
-import * as localize from './localize';
+import * as localize from "./localize";
 import { sendTelemetryEvent } from "./telemetry";
 
 export class GatherProvider implements IGatherProvider {
@@ -43,7 +52,7 @@ export class GatherProvider implements IGatherProvider {
   public async logExecution(vscCell: NotebookCell): Promise<void> {
     try {
       if (vscCell) {
-        let code = '';
+        let code = "";
         try {
           if (vscCell.document) {
             code = vscCell.document.getText();
@@ -52,7 +61,7 @@ export class GatherProvider implements IGatherProvider {
           }
 
           // find lines in code
-          const lineCount = code.split('\n').length;
+          const lineCount = code.split("\n").length;
           this.linesSubmitted += lineCount;
         } catch {
           this.linesSubmitted = -1;
@@ -75,8 +84,12 @@ export class GatherProvider implements IGatherProvider {
         }
       }
     } catch (e) {
-      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'log' });
-      window.showErrorMessage(localize.Common.loggingError() + vscCell.document.getText());
+      sendTelemetryEvent(Telemetry.GatherException, undefined, {
+        exceptionType: "log",
+      });
+      window.showErrorMessage(
+        localize.Common.loggingError() + vscCell.document.getText()
+      );
       console.error(e);
       throw e;
     }
@@ -94,7 +107,9 @@ export class GatherProvider implements IGatherProvider {
         }
       }
     } catch (e) {
-      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'reset' });
+      sendTelemetryEvent(Telemetry.GatherException, undefined, {
+        exceptionType: "reset",
+      });
       window.showErrorMessage(localize.Common.resetLog());
       console.error(e);
       throw e;
@@ -104,9 +119,15 @@ export class GatherProvider implements IGatherProvider {
   /**
    * For a given code cell, returns a string representing a program containing all the code it depends on.
    */
-  public async gatherCode(vscCell: NotebookCell, toScript: boolean = false): Promise<void> {
+  public async gatherCode(
+    vscCell: NotebookCell,
+    toScript: boolean = false
+  ): Promise<void> {
     window.withProgress(
-      { location: ProgressLocation.Notification, title: localize.Common.gathering() }, 
+      {
+        location: ProgressLocation.Notification,
+        title: localize.Common.gathering(),
+      },
       async () => {
         this.gatherTimer = new StopWatch();
         const gatheredCode = this.gatherCodeInternal(vscCell);
@@ -116,75 +137,108 @@ export class GatherProvider implements IGatherProvider {
         }
 
         const settings = workspace.getConfiguration();
-        const gatherToScript: boolean = settings.get(Constants.gatherToScriptSetting) as boolean || toScript;
+        const gatherToScript: boolean =
+          (settings.get(Constants.gatherToScriptSetting) as boolean) ||
+          toScript;
 
         if (gatherToScript) {
-          const filename = vscCell.notebook?.uri.toString() || '';
+          const filename = vscCell.notebook?.uri.toString() || "";
           await this.showFile(gatheredCode, filename);
-          sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'script' });
+          sendTelemetryEvent(
+            Telemetry.GatherCompleted,
+            this.gatherTimer?.elapsedTime,
+            { result: "script" }
+          );
         } else {
           await this.showNotebook(gatheredCode);
-          sendTelemetryEvent(Telemetry.GatherCompleted, this.gatherTimer?.elapsedTime, { result: 'notebook' });
+          sendTelemetryEvent(
+            Telemetry.GatherCompleted,
+            this.gatherTimer?.elapsedTime,
+            { result: "notebook" }
+          );
         }
 
         sendTelemetryEvent(Telemetry.GatherStats, undefined, {
           linesSubmitted: this.linesSubmitted,
           cellsSubmitted: this.cellsSubmitted,
           linesGathered: splitLines(gatheredCode.trim()).length,
-          cellsGathered: countCells(splitLines(gatheredCode.trim()))
+          cellsGathered: countCells(splitLines(gatheredCode.trim())),
         });
       }
-    );      
+    );
   }
 
   private gatherCodeInternal(vscCell: NotebookCell): string {
     const settings = workspace.getConfiguration();
-    const defaultCellMarker: string = settings ?
-      settings.get(Constants.defaultCellMarkerSetting) as string :
-      Constants.DefaultCodeCellMarker;
-    const newline = '\n';
+    const defaultCellMarker: string = settings
+      ? (settings.get(Constants.defaultCellMarkerSetting) as string)
+      : Constants.DefaultCodeCellMarker;
+    const newline = "\n";
 
     try {
       // Assume Python until proposed api is out
       // if (vscCell.language === Constants.PYTHON_LANGUAGE) {
-        if (!this._executionSlicer) {
-          window.showErrorMessage(localize.Common.notAvailable());
+      if (!this._executionSlicer) {
+        window.showErrorMessage(localize.Common.notAvailable());
+        return "";
+      }
+
+      const gatherCell = convertVscToGatherCell(vscCell);
+      if (!gatherCell) {
+        window.showErrorMessage(localize.Common.errorTranslatingCell());
+        return "";
+      }
+
+      // Call internal slice method
+      const slice = this._executionSlicer.sliceLatestExecution(
+        gatherCell.persistentId
+      );
+
+      if (slice) {
+        const PpaResult = slice.cellSlices
+          .reduce(concat, "")
+          .replace(/#%%/g, defaultCellMarker)
+          .trim();
+
+        if (PpaResult.length === 0) {
+          window.showErrorMessage(
+            localize.Common.gatherError() + "\n" + localize.Common.PPAError()
+          );
           return "";
         }
 
-        const gatherCell = convertVscToGatherCell(vscCell);
-        if (!gatherCell) {
-          window.showErrorMessage(localize.Common.errorTranslatingCell());
-          return "";
-        }
+        return PpaResult;
+      }
 
-        // Call internal slice method
-        const slice = this._executionSlicer.sliceLatestExecution(gatherCell.persistentId);
-
-        if (slice) {
-          const PpaResult = slice.cellSlices
-            .reduce(concat, "")
-            .replace(/#%%/g, defaultCellMarker)
-            .trim();
-
-          if (PpaResult.length === 0) {
-            window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
-            return "";
-          }
-
-          return PpaResult;
-        }
-        
-        sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
-        return defaultCellMarker + newline + localize.Common.gatherError() + newline + localize.Common.couldNotAnalyze();
+      sendTelemetryEvent(Telemetry.GatherException, undefined, {
+        exceptionType: "gather",
+      });
+      return (
+        defaultCellMarker +
+        newline +
+        localize.Common.gatherError() +
+        newline +
+        localize.Common.couldNotAnalyze()
+      );
     } catch (e) {
       console.error(e);
-      sendTelemetryEvent(Telemetry.GatherException, undefined, { exceptionType: 'gather' });
-      return defaultCellMarker + newline + localize.Common.gatherError() + newline + (e as string);
+      sendTelemetryEvent(Telemetry.GatherException, undefined, {
+        exceptionType: "gather",
+      });
+      return (
+        defaultCellMarker +
+        newline +
+        localize.Common.gatherError() +
+        newline +
+        (e as string)
+      );
     }
   }
 
-  public async gatherWithoutKernel(vscCell: NotebookCell, toScript: boolean): Promise<void> {
+  public async gatherWithoutKernel(
+    vscCell: NotebookCell,
+    toScript: boolean
+  ): Promise<void> {
     try {
       await this.initPromise;
 
@@ -200,11 +254,9 @@ export class GatherProvider implements IGatherProvider {
 
       // Gather normally
       await this.gatherCode(vscCell, toScript);
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e);
-    }
-    finally {
+    } finally {
       // End by reseting the log
       await this.resetLog();
     }
@@ -219,20 +271,34 @@ export class GatherProvider implements IGatherProvider {
           if (settings) {
             additionalSpecPath = settings.get(Constants.gatherSpecPathSetting);
           }
-  
-          if (additionalSpecPath && additionalSpecPath.length > 0 && (await pathExists(additionalSpecPath))) {
+
+          if (
+            additionalSpecPath &&
+            additionalSpecPath.length > 0 &&
+            (await pathExists(additionalSpecPath))
+          ) {
             const specsPaths = fs.readdirSync(additionalSpecPath);
             let specs: string[] = [];
-            specsPaths.forEach(fileName => specs.push(fs.readFileSync(path.resolve(additionalSpecPath!, fileName)).toString()));
+            specsPaths.forEach((fileName) =>
+              specs.push(
+                fs
+                  .readFileSync(path.resolve(additionalSpecPath!, fileName))
+                  .toString()
+              )
+            );
             ppa.addSpecFolder(specs);
           } else {
-            console.log(localize.Common.specFolderNotfound() + '\n' + additionalSpecPath);
+            console.log(
+              localize.Common.specFolderNotfound() + "\n" + additionalSpecPath
+            );
           }
-  
+
           // Only continue to initialize gather if we were successful in finding SOME specs.
           if (ppa.getSpecs()) {
             this.dataflowAnalyzer = new ppa.DataflowAnalyzer();
-            this._executionSlicer = new ppa.ExecutionLogSlicer(this.dataflowAnalyzer);
+            this._executionSlicer = new ppa.ExecutionLogSlicer(
+              this.dataflowAnalyzer
+            );
           } else {
             console.error(localize.Common.couldNotFindSpecs());
           }
@@ -246,19 +312,20 @@ export class GatherProvider implements IGatherProvider {
 
   private async showFile(gatheredCode: string, filename: string) {
     const settings = workspace.getConfiguration();
-    const defaultCellMarker: string = settings ?
-      settings.get(Constants.defaultCellMarkerSetting) as string :
-      Constants.DefaultCodeCellMarker;
+    const defaultCellMarker: string = settings
+      ? (settings.get(Constants.defaultCellMarkerSetting) as string)
+      : Constants.DefaultCodeCellMarker;
 
     if (gatheredCode) {
       // Remove all cell definitions and newlines
-      const re = new RegExp(`^(${defaultCellMarker}.*|\\s*)\n`, 'gm');
-      gatheredCode = gatheredCode.replace(re, '');
+      const re = new RegExp(`^(${defaultCellMarker}.*|\\s*)\n`, "gm");
+      gatheredCode = gatheredCode.replace(re, "");
     }
 
-    const annotatedScript = env?.uiKind === UIKind?.Web
-      ? `${localize.Common.gatheredScriptDescriptionWithoutSurvey()}${defaultCellMarker}\n${gatheredCode}`
-      : `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
+    const annotatedScript =
+      env?.uiKind === UIKind?.Web
+        ? `${localize.Common.gatheredScriptDescriptionWithoutSurvey()}${defaultCellMarker}\n${gatheredCode}`
+        : `${localize.Common.gatheredScriptDescription()}${defaultCellMarker}\n${gatheredCode}`;
 
     // Don't want to open the gathered code on top of the interactive window
     let viewColumn: ViewColumn | undefined;
@@ -266,20 +333,26 @@ export class GatherProvider implements IGatherProvider {
       arePathsSame(textEditor.document.fileName, filename)
     );
     const definedVisibleEditors = window.visibleTextEditors.filter(
-        (textEditor) => textEditor.viewColumn !== undefined
+      (textEditor) => textEditor.viewColumn !== undefined
     );
     if (window.visibleTextEditors.length > 0 && fileNameMatch.length > 0) {
-        // Original file is visible
-        viewColumn = fileNameMatch[0].viewColumn;
-    } else if (window.visibleTextEditors.length > 0 && definedVisibleEditors.length > 0) {
-        // There is a visible text editor, just not the original file. Make sure viewColumn isn't undefined
-        viewColumn = definedVisibleEditors[0].viewColumn;
+      // Original file is visible
+      viewColumn = fileNameMatch[0].viewColumn;
+    } else if (
+      window.visibleTextEditors.length > 0 &&
+      definedVisibleEditors.length > 0
+    ) {
+      // There is a visible text editor, just not the original file. Make sure viewColumn isn't undefined
+      viewColumn = definedVisibleEditors[0].viewColumn;
     } else {
-        // Only one panel open and interactive window is occupying it, or original file is open but hidden
-        viewColumn = ViewColumn.Beside;
+      // Only one panel open and interactive window is occupying it, or original file is open but hidden
+      viewColumn = ViewColumn.Beside;
     }
 
-    const textDoc = await workspace.openTextDocument({ language: Constants.PYTHON_LANGUAGE, content: annotatedScript });
+    const textDoc = await workspace.openTextDocument({
+      language: Constants.PYTHON_LANGUAGE,
+      content: annotatedScript,
+    });
     await window.showTextDocument(textDoc, viewColumn, true);
   }
 
@@ -287,31 +360,47 @@ export class GatherProvider implements IGatherProvider {
     const cells = generateCellsFromString(gatheredCode);
 
     const nbCells = cells.map((cell) => {
-      return new NotebookCellData(NotebookCellKind.Code, cell.source.join('\r\n'), Constants.PYTHON_LANGUAGE);
+      return new NotebookCellData(
+        NotebookCellKind.Code,
+        cell.source.join("\r\n"),
+        Constants.PYTHON_LANGUAGE
+      );
     });
 
     let finalCells: NotebookCellData[] = [
-      new NotebookCellData(NotebookCellKind.Markup, env.uiKind === UIKind?.Web
-        ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
-        : localize.Common.gatheredNotebookDescriptionInMarkdown(), 'Markdown')
+      new NotebookCellData(
+        NotebookCellKind.Markup,
+        env.uiKind === UIKind?.Web
+          ? localize.Common.gatheredNotebookDescriptionInMarkdownWithoutSurvey()
+          : localize.Common.gatheredNotebookDescriptionInMarkdown(),
+        "Markdown"
+      ),
     ];
     finalCells.push(...nbCells);
-    
-    const doc = await workspace.openNotebookDocument('jupyter-notebook', new NotebookData(finalCells));
+
+    const doc = await workspace.openNotebookDocument(
+      "jupyter-notebook",
+      new NotebookData(finalCells)
+    );
     await window.showNotebookDocument(doc, {
       viewColumn: 1,
-      preserveFocus: true
+      preserveFocus: true,
     });
   }
 
   public async smartSelect(vscCell: NotebookCell): Promise<void> {
     window.withProgress(
-      { location: ProgressLocation.Notification, title: localize.Common.smartSelecting() }, 
+      {
+        location: ProgressLocation.Notification,
+        title: localize.Common.smartSelecting(),
+      },
       async () => {
         try {
           const gatheredCode = this.gatherCodeInternal(vscCell);
           if (gatheredCode.length === 0) {
-            window.showErrorMessage(localize.Common.gatherError()  + '\n' + localize.Common.PPAError());
+            window.showErrorMessage(
+              localize.Common.gatherError() + "\n" + localize.Common.PPAError()
+            );
             return;
           }
           if (gatheredCode.includes(localize.Common.gatherError())) {
@@ -324,18 +413,24 @@ export class GatherProvider implements IGatherProvider {
             const ranges: NotebookRange[] = [];
 
             // Map gathered cells to notebook cells
-            cells.forEach(gatheredCell => {
-              const match = window.activeNotebookEditor?.document.getCells().find(notebookCell => {
-                if (notebookCell.document.getText().includes(gatheredCell.source.join('\n'))) {
-                  return notebookCell;
-                }
-              });
+            cells.forEach((gatheredCell) => {
+              const match = window.activeNotebookEditor?.notebook
+                .getCells()
+                .find((notebookCell) => {
+                  if (
+                    notebookCell.document
+                      .getText()
+                      .includes(gatheredCell.source.join("\n"))
+                  ) {
+                    return notebookCell;
+                  }
+                });
               if (match) {
                 ranges.push(new NotebookRange(match.index, match.index + 1));
               }
             });
 
-            window.showNotebookDocument(window.activeNotebookEditor.document, {
+            window.showNotebookDocument(window.activeNotebookEditor.notebook, {
               selections: ranges,
             });
           }
@@ -365,8 +460,7 @@ export class GatherProvider implements IGatherProvider {
 
       // Smart select normally
       await this.smartSelect(vscCell);
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e);
     } finally {
       // End by reseting the log
