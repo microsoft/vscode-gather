@@ -1,0 +1,182 @@
+__builtins__:
+  credits:
+    updates: []
+  dict:
+    $supers:
+    - object
+    __init__:
+      updates: [0]
+      returns: __builtins__.dict
+    clear:
+      updates: [0]
+    copy:
+      updates: [0]
+    fromkeys:
+      updates: []
+      returns: __builtins__.dict
+    get:
+      updates: []
+    items:
+      updates: []
+    keys:
+      updates: []
+    pop:
+      updates: [0]
+    popitem:
+      updates: [0]
+    setdefault:
+      updates: [0]
+    update:
+      updates: [0]
+    values:
+      updates: []
+  dir:
+    updates: []
+  divmod:
+    updates: []
+  enumerate:
+    updates: []
+  eval:
+    updates: []
+  exec:
+    updates: []
+  exit:
+    updates: []
+  filter: # handle higher order later
+    updates: []
+  float:
+    updates: []
+  format:
+    updates: []
+  frozenset:
+    updates: []
+  getattr:
+    updates: []
+  globals:
+    updates: []
+  hasattr:
+    updates: []
+  hash:
+    updates: []
+  help:
+    updates: []
+  hex:
+    updates: []
+  id:
+    updates: []
+  input:
+    updates: []
+  int:
+    updates: []
+  isinstance:
+    updates: []
+  issubclass:
+    updates: []
+  iter:
+    updates: []
+  len:
+    updates: []
+  license:
+    updates: []
+  list:
+    $supers:
+    - object
+    __init__:
+      updates: [0]
+      returns: __builtins__.list
+    append:
+      updates: [0]
+    count:
+      updates: []
+    clear:
+      updates: [0]
+    copy:
+      updates: []
+      returns: __builtins__.list
+    extend:
+      updates: [0]
+    index:
+      updates: []
+    insert:
+      updates: [0]
+    len:
+      updates: []
+    max:
+      updates: []
+    min:
+      updates: []
+    pop:
+      updates: [0]
+    remove:
+      updates: [0]
+    reverse:
+      updates: [0]
+    sort:
+      updates: [0]
+  locals:
+    updates: []
+  map: # handle higher order later
+    updates: []
+  max:
+    updates: []
+  memoryview:
+    updates: []
+  min:
+    updates: []
+  next:
+    updates: []
+  object:
+    updates: []
+  oct:
+    updates: []
+  open:
+    updates: []
+  ord:
+    updates: []
+  pow:
+    updates: []
+  print:
+    updates: []
+  property:
+    updates: []
+  quit:
+    updates: []
+  range:
+    updates: []
+  repr:
+    updates: []
+  reversed:
+    updates: []
+  round:
+    updates: []
+  set:
+    updates: []
+  slice:
+    updates: []
+  sorted:
+    updates: []
+  staticmethod:
+    updates: []
+  str:
+    updates: []
+  sum:
+    updates: []
+  super:
+    updates: []
+  tuple:
+    updates: []
+  type:
+    updates: []
+  vars:
+    updates: []
+  zip:
+    updates: []
+  delattr:
+    updates: [1]
+  setattr:
+    updates: [1]
+  BaseException:
+    $supers:
+    - object
+    with_traceback:
+      updates: [1]

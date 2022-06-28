@@ -3,7 +3,7 @@
 
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const copyWebpackPlugin = require('copy-webpack-plugin');
+const copyWebpackPlugin = require("copy-webpack-plugin");
 
 const config = {
   target: "node",
@@ -25,22 +25,27 @@ const config = {
     new CleanWebpackPlugin(),
     new copyWebpackPlugin([
       {
-          from: './node_modules/@msrvida/python-program-analysis/dist/es5/index.js',
-          to: './node_modules/@msrvida/python-program-analysis/dist/es5/index.js'
-      }
+        from: "./node_modules/@msrvida/python-program-analysis/dist/**/*.js",
+      },
     ]),
     new copyWebpackPlugin([
       {
-          from: './node_modules/@msrvida/python-program-analysis/dist/umd/index.js',
-          to: './node_modules/@msrvida/python-program-analysis/dist/umd/index.js'
-      }
+        from: "resources/specs/*.yaml",
+        to: "./node_modules/@msrvida/python-program-analysis/dist/es5/specs/[name].[ext]",
+      },
     ]),
     new copyWebpackPlugin([
       {
-          from: './node_modules/@msrvida/python-program-analysis/package.json',
-          to: './node_modules/@msrvida/python-program-analysis/package.json'
-      }
-    ])
+        from: "./node_modules/js-yaml/**/*.*",
+        to: "./node_modules/@msrvida/python-program-analysis/",
+      },
+    ]),
+    new copyWebpackPlugin([
+      {
+        from: "./node_modules/@msrvida/python-program-analysis/package.json",
+        to: "./node_modules/@msrvida/python-program-analysis/package.json",
+      },
+    ]),
     // new analyzer.BundleAnalyzerPlugin({
     //   analyzerMode: "static",
     //   reportFilename: "analyzer.html",
