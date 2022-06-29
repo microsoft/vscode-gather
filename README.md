@@ -38,3 +38,12 @@ It is possible to add packages or APIs to the supported list on your local insta
 - Any and all feedback is appreciated and welcome!
   - If someone has already [filed an issue](https://github.com/microsoft/vscode-jupyter) that encompasses your feedback, please leave a 👍/👎 reaction on the issue
   - Otherwise please file a new issue
+  
+## Building
+
+This repository uses a private npm feed for some of it's functionality. In order to access this private
+feed, you first need access to this: https://dev.azure.com/msresearch/python-program-analysis/_artifacts/feed/MSR-Python-Analysis/connect/npm
+
+Then run
+- npm run npm-auth
+- npm install

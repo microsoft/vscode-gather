@@ -1,0 +1,45 @@
+random:
+  seed:
+    updates: [$global]
+  setstate: 
+    updates: [$global]
+  betavariate:
+    updates: []
+  choice:
+    updates: []
+  choices:
+    updates: []
+  expovariate:
+    updates: []
+  gammavariate:
+    updates: []
+  gauss:
+    updates: []
+  getrandbits:
+    updates: []
+  getstate:
+    updates: []
+  lognormvariate:
+    updates: []
+  normalvariate:
+    updates: []
+  paretovariate:
+    updates: []
+  randint:
+    updates: []
+  random:
+    updates: []
+  randrange:
+    updates: []
+  sample:
+    updates: []
+  shuffle:
+    updates: []
+  triangular:
+    updates: []
+  uniform:
+    updates: []
+  vonmisesvariate:
+    updates: []
+  weibullvariate:
+    updates: []
