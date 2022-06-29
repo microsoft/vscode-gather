@@ -34,6 +34,7 @@ extends:
             echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:email=npm requires email to be set but doesnt use the value' >> .npmrc
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
+            echo '$(NPM_TOKEN_BASE64_FOR_GATHER) was written to .npmrc'
 
       - script: npm ci
         displayName: Install dependencies
