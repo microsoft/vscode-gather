@@ -35,7 +35,7 @@ const config = {
       },
       {
         test: /\.yaml/,
-        type: "asset/inline",
+        type: "asset/source",
       },
     ],
   },
