@@ -38,8 +38,10 @@ extends:
 
       - task: Bash@3
         displayName: Print .npmrc file
-        script: |
-           cat .npmrc
+        inputs:
+          targetType: 'inline'
+          script: |
+            cat .npmrc
 
       - script: npm ci
         displayName: Install dependencies
