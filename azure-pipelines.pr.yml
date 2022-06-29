@@ -14,10 +14,25 @@ pr:
 # Not the CI build for merges to main and release.
 trigger: none
 
-steps:
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: microsoft/vscode-engineering
+      ref: main
+      endpoint: Monaco
+
+
+extends:
+  template: azure-pipelines/extension/pre-release.yml@templates
+  parameters:
+    buildSteps:
+
+
+
   # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
   # Generate token with read/write for Packaging from the msresearch org.
-
   - task: Bash@3
     displayName: Update .npmrc file
     inputs:
