@@ -14,7 +14,6 @@ pr:
 # Not the CI build for merges to main and release.
 trigger: none
 
-
 resources:
   repositories:
     - repository: templates
@@ -23,18 +22,17 @@ resources:
       ref: main
       endpoint: Monaco
 
-
 extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
     buildSteps:
-# Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
-# Generate token with read/write for Packaging from the msresearch org.
+      # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
+      # Generate token with read/write for Packaging from the msresearch org.
 
       - task: Bash@3
         displayName: Update .npmrc file
         inputs:
-          targetType: 'inline'
+          targetType: "inline"
           script: |
             echo '@msrvida:registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
             echo 'always-auth=true' >> .npmrc
@@ -62,4 +60,4 @@ extends:
         displayName: Package
 
       - publish: $(System.DefaultWorkingDirectory)/vscode-gather.vsix
-         artifact: vscode-gather.vsix
+        artifact: vscode-gather.vsix
