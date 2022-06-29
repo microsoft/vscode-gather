@@ -1,15 +1,15 @@
 # PR Validation build.
 
-name: '$(Year:yyyy).$(Month).0.$(BuildID)-pr'
+name: "$(Year:yyyy).$(Month).0.$(BuildID)-pr"
 
 # Notes: Only trigger a PR build for main and release, and skip build/rebuild
 #        on changes in the news and .vscode folders.
 pr:
   autoCancel: true
   branches:
-    include: ['main', 'release/*']
+    include: ["main", "release/*"]
   paths:
-    exclude: ['/.vscode']
+    exclude: ["/.vscode"]
 
 # Not the CI build for merges to main and release.
 trigger: none
@@ -17,23 +17,23 @@ trigger: none
 steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '14.16.0'
-    displayName: 'Install Node.js'
+      versionSpec: "16.14.0"
+    displayName: "Install Node.js"
 
   - task: Npm@1
-    displayName: 'Use NPM 6.13.4'
+    displayName: "Use NPM 8.3.1"
     inputs:
       command: custom
       verbose: true
-      customCommand: 'install -g npm@6.13.4'
+      customCommand: "install -g npm@8.3.1"
 
-# Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
-# Generate token with read/write for Packaging from the msresearch org.
+  # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
+  # Generate token with read/write for Packaging from the msresearch org.
 
   - task: Bash@3
     displayName: Update .npmrc file
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         echo '@msrvida:registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
         echo 'always-auth=true' >> .npmrc
@@ -53,7 +53,6 @@ steps:
 
   - script: npm i -g vsce
     displayName: Install vsce
-
 
   - script: npm run build
     displayName: Build
