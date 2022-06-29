@@ -133,7 +133,7 @@
     "download-api": "vscode-dts dev",
     "postdownload-api": "vscode-dts main",
     "preinstall": "npx npm-force-resolutions",
-    "postinstall": "npm run download-api"
+    "postinstall": "npm run download-api && node ./scripts/postInstall.js"
   },
   "devDependencies": {
     "@types/copy-webpack-plugin": "^4.4.2",

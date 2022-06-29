@@ -17,42 +17,11 @@ const config = {
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
   devtool: "source-map",
-  externals: ["vscode", "commonjs", "@msrvida/python-program-analysis"],
+  externals: ["vscode", "commonjs"],
   resolve: {
     extensions: [".ts", ".js"],
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-    new copyWebpackPlugin([
-      {
-        from: "./node_modules/@msrvida/python-program-analysis/dist/**/*.js",
-      },
-    ]),
-    new copyWebpackPlugin([
-      {
-        from: "resources/specs/*.yaml",
-        to: "./node_modules/@msrvida/python-program-analysis/dist/es5/specs/[name].[ext]",
-      },
-    ]),
-    new copyWebpackPlugin([
-      {
-        from: "./node_modules/js-yaml/**/*.*",
-        to: "./node_modules/@msrvida/python-program-analysis/",
-      },
-    ]),
-    new copyWebpackPlugin([
-      {
-        from: "./node_modules/@msrvida/python-program-analysis/package.json",
-        to: "./node_modules/@msrvida/python-program-analysis/package.json",
-      },
-    ]),
-    // new analyzer.BundleAnalyzerPlugin({
-    //   analyzerMode: "static",
-    //   reportFilename: "analyzer.html",
-    //   openAnalyzer: true,
-    //   generateStatsFile: true,
-    // }),
-  ],
+  plugins: [new CleanWebpackPlugin()],
   module: {
     rules: [
       {
@@ -63,6 +32,10 @@ const config = {
             loader: "ts-loader",
           },
         ],
+      },
+      {
+        test: /\.yaml/,
+        type: "asset/inline",
       },
     ],
   },
