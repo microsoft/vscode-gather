@@ -31,37 +31,37 @@ extends:
 
 
 
-  # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
-  # Generate token with read/write for Packaging from the msresearch org.
-  - task: Bash@3
-    displayName: Update .npmrc file
-    inputs:
-      targetType: "inline"
-      script: |
-        echo '@msrvida:registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
-        echo 'always-auth=true' >> .npmrc
-        echo '' >> .npmrc
-        echo '; begin auth token' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:username=msresearch' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:email=npm requires email to be set but doesnt use the value' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:username=msresearch' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
-        echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:email=npm requires email to be set but doesnt use the value' >> .npmrc
-        echo '; end auth token' >> .npmrc
-        echo '' >> .npmrc
+      # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
+      # Generate token with read/write for Packaging from the msresearch org.
+      - task: Bash@3
+        displayName: Update .npmrc file
+        inputs:
+          targetType: "inline"
+          script: |
+            echo '@msrvida:registry=https://pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/.' > .npmrc
+            echo 'always-auth=true' >> .npmrc
+            echo '' >> .npmrc
+            echo '; begin auth token' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:username=msresearch' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/registry/:email=npm requires email to be set but doesnt use the value' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:username=msresearch' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:_password=$(NPM_TOKEN_BASE64_FOR_GATHER)' >> .npmrc
+            echo '//pkgs.dev.azure.com/msresearch/_packaging/MSR-Python-Analysis/npm/:email=npm requires email to be set but doesnt use the value' >> .npmrc
+            echo '; end auth token' >> .npmrc
+            echo '' >> .npmrc
 
-  - script: npm ci
-    displayName: Install dependencies
+      - script: npm ci
+        displayName: Install dependencies
 
-  - script: npm i -g vsce
-    displayName: Install vsce
+      - script: npm i -g vsce
+        displayName: Install vsce
 
-  - script: npm run build
-    displayName: Build
+      - script: npm run build
+        displayName: Build
 
-  - script: vsce package -o vscode-gather.vsix
-    displayName: Package
+      - script: vsce package -o vscode-gather.vsix
+        displayName: Package
 
-  - publish: $(System.DefaultWorkingDirectory)/vscode-gather.vsix
-    artifact: vscode-gather.vsix
+      - publish: $(System.DefaultWorkingDirectory)/vscode-gather.vsix
+         artifact: vscode-gather.vsix
