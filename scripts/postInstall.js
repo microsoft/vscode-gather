@@ -14,8 +14,10 @@ function updateSpecFiles() {
     "python-program-analysis",
     "dist",
     "es5",
+    "specs",
     "specs"
   );
+  fs.mkdirSync(destDir, { recursive: true });
   fs.copySync(sourceDir, destDir);
 }
 
