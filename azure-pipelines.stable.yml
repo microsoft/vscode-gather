@@ -36,6 +36,11 @@ extends:
             echo '' >> .npmrc
             echo '$(NPM_TOKEN_BASE64_FOR_GATHER) was written to .npmrc'
 
+      - task: Bash@3
+        displayName: Print .npmrc file
+        script: |
+           cat .npmrc
+
       - script: npm ci
         displayName: Install dependencies
 
