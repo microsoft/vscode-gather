@@ -168,13 +168,13 @@
     "@types/uuid": "^3.4.3",
     "@vscode/extension-telemetry": "^0.6.2",
     "fs-extra": "^4.0.3",
-    "npm": "^8.13.1",
     "path": "^0.12.7",
     "stack-trace": "0.0.10",
     "uuid": "^3.3.2"
   },
   "resolutions": {
     "url-parse": "1.5.8",
-    "glob-parent": "5.1.2"
+    "glob-parent": "5.1.2",
+    "moment": "2.29.4"
   }
 }
