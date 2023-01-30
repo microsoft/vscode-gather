@@ -1,5 +1,4 @@
 import TelemetryReporter from "@vscode/extension-telemetry";
-import * as stackTrace from "stack-trace";
 import { Constants, Telemetry } from "./types/types";
 
 const AppinsightsKey = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
@@ -36,7 +35,7 @@ export function sendTelemetryEvent<
     eventNameSent = "ERROR";
     customProperties = {
       originalEventName: eventName as string,
-      stackTrace: serializeStackTrace(ex),
+      stackTrace: ex.stack || '',
     };
     reporter.sendTelemetryErrorEvent(eventNameSent, customProperties, measures);
   } else {
@@ -134,47 +133,4 @@ function isTelemetrySupported(): boolean {
   } catch {
     return false;
   }
-}
-
-function serializeStackTrace(ex: Error): string {
-  // We aren't showing the error message (ex.message) since it might contain PII.
-  let trace = "";
-  for (const frame of stackTrace.parse(ex)) {
-    const filename = frame.getFileName();
-    if (filename) {
-      const lineno = frame.getLineNumber();
-      const colno = frame.getColumnNumber();
-      trace += `\n\tat ${getCallsite(frame)} ${filename}:${lineno}:${colno}`;
-    } else {
-      trace += "\n\tat <anonymous>";
-    }
-  }
-  // Ensure we always use `/` as path separators.
-  // This way stack traces (with relative paths) coming from different OS will always look the same.
-  return trace.trim().replace(/\\/g, "/");
-}
-
-function getCallsite(frame: stackTrace.StackFrame) {
-  const parts: string[] = [];
-  if (
-    typeof frame.getTypeName() === "string" &&
-    frame.getTypeName().length > 0
-  ) {
-    parts.push(frame.getTypeName());
-  }
-  if (
-    typeof frame.getMethodName() === "string" &&
-    frame.getMethodName().length > 0
-  ) {
-    parts.push(frame.getMethodName());
-  }
-  if (
-    typeof frame.getFunctionName() === "string" &&
-    frame.getFunctionName().length > 0
-  ) {
-    if (parts.length !== 2 || parts.join(".") !== frame.getFunctionName()) {
-      parts.push(frame.getFunctionName());
-    }
-  }
-  return parts.join(".");
 }
