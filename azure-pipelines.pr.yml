@@ -47,9 +47,6 @@ extends:
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
 
-      - script: cat .npmrc
-        displayName: Display .npmrc file contents
-
       - bash: npm i -g npm@8.15.1
         displayName: Install npm@8.15.1
 
