@@ -25,6 +25,7 @@ resources:
 extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
+	  customNPMRegistry:
     buildSteps:
       # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
       # Generate token with read/write for Packaging from the msresearch org.
