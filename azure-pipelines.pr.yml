@@ -25,13 +25,10 @@ resources:
 extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
-    # customNPMRegistry:
+    customNPMRegistry:
     buildSteps:
       # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
       # Generate token with read/write for Packaging from the msresearch org.
-
-      - bash: cat .npmrc
-        displayName: Display npmrc file
 
       - task: Bash@3
         displayName: Update .npmrc file
