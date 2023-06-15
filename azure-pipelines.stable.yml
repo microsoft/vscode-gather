@@ -1,4 +1,7 @@
-trigger: none
+trigger:
+  branches:
+    include:
+      - main
 pr: none
 
 resources:
@@ -9,10 +12,16 @@ resources:
       ref: main
       endpoint: Monaco
 
+parameters:
+  - name: publishExtension
+    displayName: 🚀 Publish Extension
+    type: boolean
+    default: false
+
 extends:
   template: azure-pipelines/extension/stable.yml@templates
   parameters:
-    publishExtension: true
+    publishExtension: ${{ parameters.publishExtension }}
     buildSteps:
 # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
 # Generate token with read/write for Packaging from the msresearch org.
