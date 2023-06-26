@@ -9821,7 +9821,7 @@ pandas:
           updates: []
         generate_property:
           updates: []
-        pin_whitelisted_properties:
+        pin_allowed_properties:
           updates: []
       groupby:
         GroupBy: *id108
@@ -28814,36 +28814,36 @@ pandas:
           updates: [0]
         test_series_groupby_value_counts_with_grouper:
           updates: []
-      test_whitelist:
-        check_whitelist:
+      test_allowlist:
+        check_allowlist:
           updates: []
         df:
           updates: []
         df_letters:
           updates: []
-        df_whitelist_fixture:
+        df_allowlist_fixture:
           updates: []
         mframe:
           updates: []
         raw_frame:
           updates: []
-        s_whitelist_fixture:
+        s_allowlist_fixture:
           updates: []
         test_all_methods_categorized:
           updates: []
-        test_groupby_blacklist:
+        test_groupby_disallowlist:
           updates: []
-        test_groupby_frame_whitelist:
+        test_groupby_frame_allowlist:
           updates: []
         test_groupby_function_rename:
           updates: []
         test_groupby_selection_with_methods:
           updates: [0]
-        test_groupby_series_whitelist:
+        test_groupby_series_allowlist:
           updates: []
-        test_groupby_whitelist:
+        test_groupby_allowlist:
           updates: []
-        test_regression_whitelist_methods:
+        test_regression_allowlist_methods:
           updates: []
         test_tab_completion:
           updates: []

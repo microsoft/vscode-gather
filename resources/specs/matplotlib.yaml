@@ -12259,7 +12259,7 @@ matplotlib:
     core:
       _apply_style:
         updates: []
-      _remove_blacklisted_style_params:
+      _remove_disallowed_style_params:
         updates: []
       context: *id046
       is_style_file:
