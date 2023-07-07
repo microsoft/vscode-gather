@@ -16,7 +16,16 @@ const config = {
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
   devtool: "source-map",
-  externals: ["vscode", "commonjs"],
+  externals: [
+    "vscode",
+    "commonjs",
+    "@opentelemetry/tracing",
+    // // Ignore telemetry specific packages that are not required.
+    "applicationinsights-native-metrics",
+    "@azure/functions-core",
+    "@azure/opentelemetry-instrumentation-azure-sdk",
+    "@opentelemetry/instrumentation",
+  ],
   resolve: {
     extensions: [".ts", ".js"],
   },
