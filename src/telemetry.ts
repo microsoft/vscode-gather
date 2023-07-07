@@ -1,5 +1,6 @@
 import TelemetryReporter from "@vscode/extension-telemetry";
-import { Constants, Telemetry } from "./types/types";
+import { Telemetry } from "./types/types";
+import { workspace } from "vscode";
 
 const AppinsightsKey = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
 const sharedProperties: Record<string, any> = {};
@@ -13,7 +14,7 @@ export function sendTelemetryEvent<
   properties?: P[E],
   ex?: Error
 ) {
-  if (isTestExecution() || !isTelemetrySupported()) {
+  if (isTestExecution() || !isTelemetrySupported() || isTelemetryDisabled()) {
     return;
   }
   const reporter = getTelemetryReporter();
@@ -35,7 +36,7 @@ export function sendTelemetryEvent<
     eventNameSent = "ERROR";
     customProperties = {
       originalEventName: eventName as string,
-      stackTrace: ex.stack || '',
+      stackTrace: ex.stack || "",
     };
     reporter.sendTelemetryErrorEvent(eventNameSent, customProperties, measures);
   } else {
@@ -98,25 +99,14 @@ interface IEventNamePropertyMapping {
 }
 
 let telemetryReporter: TelemetryReporter | undefined;
-function getTelemetryReporter() {
+function getTelemetryReporter(): TelemetryReporter {
   if (!isTestExecution() && telemetryReporter) {
     return telemetryReporter;
   }
-  const extensionId = Constants.GatherExtension;
-  // tslint:disable-next-line:no-require-imports
-  const extensions = (require("vscode") as typeof import("vscode")).extensions;
-  const extension = extensions.getExtension(extensionId)!;
-  const extensionVersion = extension.packageJSON.version;
 
-  // tslint:disable-next-line:no-require-imports
   const reporter = require("@vscode/extension-telemetry")
     .default as typeof TelemetryReporter;
-  return (telemetryReporter = new reporter(
-    extensionId,
-    extensionVersion,
-    AppinsightsKey,
-    true
-  ));
+  return (telemetryReporter = new reporter(AppinsightsKey));
 }
 
 function isTestExecution(): boolean {
@@ -133,4 +123,15 @@ function isTelemetrySupported(): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Checks if the telemetry is disabled in user settings
+ * @returns {boolean}
+ */
+function isTelemetryDisabled(): boolean {
+  const settings = workspace
+    .getConfiguration("telemetry")
+    .inspect<boolean>("enableTelemetry")!;
+  return settings.globalValue === false ? true : false;
 }
