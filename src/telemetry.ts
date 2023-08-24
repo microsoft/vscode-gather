@@ -1,17 +1,17 @@
 import TelemetryReporter from "@vscode/extension-telemetry";
-import { Constants, Telemetry } from "./types/types";
+import { Telemetry } from "./types/types";
 
 const AppinsightsKey = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
 const sharedProperties: Record<string, any> = {};
 
 export function sendTelemetryEvent<
   P extends IEventNamePropertyMapping,
-  E extends keyof P
+  E extends keyof P,
 >(
   eventName: E,
   durationMs?: Record<string, number> | number,
   properties?: P[E],
-  ex?: Error
+  ex?: Error,
 ) {
   if (isTestExecution() || !isTelemetrySupported()) {
     return;
@@ -35,7 +35,7 @@ export function sendTelemetryEvent<
     eventNameSent = "ERROR";
     customProperties = {
       originalEventName: eventName as string,
-      stackTrace: ex.stack || '',
+      stackTrace: ex.stack || "",
     };
     reporter.sendTelemetryErrorEvent(eventNameSent, customProperties, measures);
   } else {
@@ -57,7 +57,7 @@ export function sendTelemetryEvent<
         } catch (ex) {
           console.error(
             `Failed to serialize ${prop} for ${eventName.toString()}`,
-            ex
+            ex,
           );
         }
       });
@@ -102,21 +102,11 @@ function getTelemetryReporter() {
   if (!isTestExecution() && telemetryReporter) {
     return telemetryReporter;
   }
-  const extensionId = Constants.GatherExtension;
-  // tslint:disable-next-line:no-require-imports
-  const extensions = (require("vscode") as typeof import("vscode")).extensions;
-  const extension = extensions.getExtension(extensionId)!;
-  const extensionVersion = extension.packageJSON.version;
 
   // tslint:disable-next-line:no-require-imports
   const reporter = require("@vscode/extension-telemetry")
     .default as typeof TelemetryReporter;
-  return (telemetryReporter = new reporter(
-    extensionId,
-    extensionVersion,
-    AppinsightsKey,
-    true
-  ));
+  return (telemetryReporter = new reporter(AppinsightsKey));
 }
 
 function isTestExecution(): boolean {
