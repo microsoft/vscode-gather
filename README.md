@@ -41,9 +41,9 @@ It is possible to add packages or APIs to the supported list on your local insta
 
 ## Building
 
-This repository uses a private npm feed for some of it's functionality. In order to access this private
-feed, you first need access to the [MSR-Python-Analysis feed](https://dev.azure.com/msresearch/MSR%20Engineering/_artifacts/feed/MSR-Python-Analysis/connect/npm)
+This repository uses the private [MSR-Python-Analysis npm feed](https://dev.azure.com/msresearch/MSR%20Engineering/_artifacts/feed/MSR-Python-Analysis/connect/npm) feed for some of its functionality.
 
-Then run
+After gaining access to that feed, run
+
 - npm run npm-auth
 - npm install
