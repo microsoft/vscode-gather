@@ -48,14 +48,14 @@ extends:
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
 
-      - bash: npm i -g npm@8.15.1
-        displayName: Install npm@8.15.1
+      - bash: npm i -g npm@9.5.0
+        displayName: Install npm@9.5.0
 
       - script: npm ci
         displayName: Install dependencies
 
-      - script: npm i -g vsce
-        displayName: Install vsce
+      - script: npm i -g @vscode/vsce
+        displayName: Install @vscode/vsce
 
       - script: npm run build
         displayName: Build
