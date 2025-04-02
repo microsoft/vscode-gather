@@ -1,19 +1,16 @@
 "use strict";
 import {
   commands,
-  notebooks,
   NotebookCell,
-  NotebookCellExecutionState,
-  NotebookCellExecutionStateChangeEvent,
-  Uri,
   window,
   workspace,
+  type NotebookDocument,
 } from "vscode";
 import { Constants, IGatherProvider, Telemetry } from "./types/types";
 import { sendTelemetryEvent } from "./telemetry";
 import * as localize from "./localize";
 
-const gatherProviderMap = new WeakMap<Uri, IGatherProvider>();
+const gatherProviderMap = new WeakMap<NotebookDocument, IGatherProvider>();
 
 export async function activate() {
   try {
@@ -23,7 +20,7 @@ export async function activate() {
     commands.registerCommand(
       Constants.gatherNativeNotebookCommand,
       async (cell: NotebookCell) => {
-        let provider = gatherProviderMap.get(cell.notebook.uri);
+        let provider = gatherProviderMap.get(cell.notebook);
         let toScript = cell.notebook.notebookType === "interactive";
 
         if (provider) {
@@ -39,7 +36,7 @@ export async function activate() {
           }
 
           provider = new gather.GatherProvider(language);
-          gatherProviderMap.set(cell.notebook.uri, provider);
+          gatherProviderMap.set(cell.notebook, provider);
           provider.gatherWithoutKernel(cell, toScript);
         }
       }
@@ -49,7 +46,7 @@ export async function activate() {
     commands.registerCommand(
       Constants.smartSelectCommand,
       (cell: NotebookCell) => {
-        let provider = gatherProviderMap.get(cell.notebook.uri);
+        let provider = gatherProviderMap.get(cell.notebook);
 
         if (provider) {
           provider.smartSelect(cell);
@@ -64,7 +61,7 @@ export async function activate() {
           }
 
           provider = new gather.GatherProvider(language);
-          gatherProviderMap.set(cell.notebook.uri, provider);
+          gatherProviderMap.set(cell.notebook, provider);
           provider.smartSelectWithoutKernel(cell);
         }
       }
@@ -89,26 +86,26 @@ export async function activate() {
 
     // Delete the gatherProvider when a notebook is closed.
     workspace.onDidCloseNotebookDocument((notebook) => {
-      if (gatherProviderMap.has(notebook.uri)) {
-        gatherProviderMap.delete(notebook.uri);
+      if (gatherProviderMap.has(notebook)) {
+        gatherProviderMap.delete(notebook);
       }
     });
 
-    notebooks.onDidChangeNotebookCellExecutionState(
-      (e: NotebookCellExecutionStateChangeEvent) => {
+    workspace.onDidChangeNotebookDocument((e) => {
+      for (const cellChange of e.cellChanges) {
         if (
-          e.state === NotebookCellExecutionState.Idle &&
-          e.cell.document.languageId === Constants.PYTHON_LANGUAGE
+          cellChange.cell.document.languageId !== Constants.PYTHON_LANGUAGE ||
+          typeof cellChange.executionSummary?.executionOrder !== "number"
         ) {
-          let provider = gatherProviderMap.get(e.cell.notebook.uri);
-          if (!provider) {
-            provider = new gather.GatherProvider(Constants.PYTHON_LANGUAGE);
-            gatherProviderMap.set(e.cell.notebook.uri, provider);
-          }
-          provider.logExecution(e.cell);
+          continue;
         }
+        const provider =
+          gatherProviderMap.get(cellChange.cell.notebook) ??
+          new gather.GatherProvider(Constants.PYTHON_LANGUAGE);
+        gatherProviderMap.set(cellChange.cell.notebook, provider);
+        provider.logExecution(cellChange.cell);
       }
-    );
+    });
   } catch (e) {
     window.showErrorMessage(localize.Common.activateError(), e as string);
     sendTelemetryEvent(Telemetry.GatherException, undefined, {
