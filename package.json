@@ -2,7 +2,7 @@
   "name": "gather",
   "displayName": "Gather",
   "description": "Adds gather functionality in the Python language to the Jupyter Extension",
-  "version": "2022.3.2",
+  "version": "2025.4.0",
   "publisher": "ms-python",
   "preview": true,
   "author": {
@@ -113,9 +113,6 @@
   "extensionDependencies": [
     "ms-toolsai.jupyter"
   ],
-  "enabledApiProposals": [
-    "notebookCellExecutionState"
-  ],
   "scripts": {
     "build": "webpack --mode production",
     "webpack": "webpack --mode development",
@@ -143,6 +140,7 @@
     "@types/uuid": "^3.4.10",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
+    "@vscode/test-electron": "^2.4.1",
     "clean-webpack-plugin": "^4.0.0",
     "eslint": "^8.44.0",
     "glob": "^10.3.1",
@@ -152,7 +150,6 @@
     "typemoq": "^2.1.0",
     "typescript": "^5.1.6",
     "vscode-dts": "^0.3.3",
-    "vscode-test": "^1.6.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   }
