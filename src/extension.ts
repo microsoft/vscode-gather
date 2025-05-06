@@ -95,7 +95,9 @@ export async function activate() {
       for (const cellChange of e.cellChanges) {
         if (
           cellChange.cell.document.languageId !== Constants.PYTHON_LANGUAGE ||
-          typeof cellChange.executionSummary?.executionOrder !== "number"
+          typeof cellChange.executionSummary?.executionOrder !== "number" ||
+          typeof cellChange.executionSummary?.success !== "boolean" ||
+          !cellChange.executionSummary?.timing
         ) {
           continue;
         }
