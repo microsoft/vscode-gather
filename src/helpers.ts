@@ -1,5 +1,5 @@
 import * as ppa from "@msrvida/python-program-analysis";
-import * as uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import * as vscode from "vscode";
 import * as path from 'path';
 import { FileType, FileStat, Uri, workspace } from "vscode";
