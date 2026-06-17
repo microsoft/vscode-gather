@@ -1,4 +1,4 @@
-import TelemetryReporter from "@vscode/extension-telemetry";
+import { TelemetryReporter } from "@vscode/extension-telemetry";
 import { Telemetry } from "./types/types";
 import { workspace } from "vscode";
 
@@ -105,7 +105,7 @@ function getTelemetryReporter(): TelemetryReporter {
   }
 
   const reporter = require("@vscode/extension-telemetry")
-    .default as typeof TelemetryReporter;
+    .TelemetryReporter as typeof TelemetryReporter;
   return (telemetryReporter = new reporter(AppinsightsKey));
 }
 
