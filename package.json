@@ -128,7 +128,7 @@
   },
   "dependencies": {
     "@msrvida/python-program-analysis": "^0.5.4",
-    "@vscode/extension-telemetry": "^0.8.4",
+    "@vscode/extension-telemetry": "^1.5.2",
     "fs-extra": "^11.1.1",
     "uuid": "^14.0.0"
   },
