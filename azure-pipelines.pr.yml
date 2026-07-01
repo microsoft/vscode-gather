@@ -48,9 +48,6 @@ extends:
             echo '; end auth token' >> .npmrc
             echo '' >> .npmrc
 
-      - bash: npm i -g npm@9.5.0
-        displayName: Install npm@9.5.0
-
       - script: npm ci
         displayName: Install dependencies
 

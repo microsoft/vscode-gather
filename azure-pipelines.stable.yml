@@ -52,9 +52,6 @@ extends:
           script: |
             cat .npmrc
 
-      - bash: npm i -g npm@9.5.0
-        displayName: Install npm@9.5.0
-
       - script: npm ci
         displayName: Install dependencies
 
