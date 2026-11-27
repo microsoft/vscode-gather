@@ -28,7 +28,7 @@ extends:
     customNPMRegistry:
     buildSteps:
       # Instructions can be found here under `npm` (https://dev.azure.com/msresearch/MSR%20Engineering/_packaging?_a=connect&feed=MSR-Python-Analysis)
-      # Generate token with read/write for Packaging from the msresearch org.
+      # Generate token with read permission for Packaging from the msresearch org.
 
       - task: Bash@3
         displayName: Update .npmrc file
